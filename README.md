@@ -63,3 +63,13 @@ ThamiFin is a web-based personal finance application built with FastAPI and SQLA
 ## License
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+## Dashboard
+![Dashboard Screen](screenshots/Screenshot.png)
+
+## Revenue
+![Revenue](screenshots/Screenshot2.png)
+
+## Costs
+![Costs](screenshots/Screenshot3.png)
+
