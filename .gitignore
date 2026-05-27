@@ -1,0 +1,32 @@
+# Banco de dados
+*.db
+*.sqlite3
+
+# Arquivos de extratos e comprovantes (Sensíveis)
+*.ofx
+*.pdf
+app-financeiro/pdf_extracted.txt
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+venv/
+ENV/
+.env
+.venv
+
+# IDEs e Ferramentas
+.vscode/
+.idea/
+.antigravitycli/
+.DS_Store
+
+# Logs
+*.log
+
+# Documentação e anotações pessoais
+*.md
