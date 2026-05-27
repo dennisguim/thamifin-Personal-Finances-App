@@ -1,0 +1,390 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Planejador - ThamiFin</title>
+    <!-- Google Fonts & Material Symbols -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0" rel="stylesheet">
+    <!-- Chart.js para Projeção -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="stylesheet" href="/static/css/style.css">
+</head>
+<body>
+    <script>
+        // Inicializa o tema imediatamente para evitar flashes de cor
+        const savedTheme = localStorage.getItem("theme");
+        const systemPrefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
+        if (savedTheme === "dark" || (!savedTheme && systemPrefersDark)) {
+            document.body.classList.add("dark-mode");
+        }
+    </script>
+
+    <!-- OVERLAY DE BACKDROP DA SIDEBAR MOBILE -->
+    <div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+    <!-- CABEÇALHO DO MOBILE -->
+    <header class="mobile-header">
+        <button class="hamburger-btn" id="mobileMenuBtn" title="Menu lateral">
+            <span class="material-symbols-outlined">menu</span>
+        </button>
+        <div class="mobile-brand">
+            <img src="/static/thami-logo.png" alt="ThamiFin Logo" class="mobile-logo">
+            <span>ThamiFin</span>
+        </div>
+        <button class="theme-toggle-btn" id="mobileThemeToggleBtn" title="Alternar tema">
+            <span class="material-symbols-outlined" id="mobileThemeToggleIcon">dark_mode</span>
+        </button>
+    </header>
+
+    <div class="dashboard-layout">
+        
+        <!-- SIDEBAR DE NAVEGAÇÃO LATERAL (NAVIGATION RAIL) -->
+        <aside class="m3-sidebar" id="dashboardSidebar">
+            <div class="sidebar-top">
+                <div class="logo-section">
+                    <h2>
+                        <img src="/static/thami-logo.png" alt="ThamiFin Logo" class="sidebar-logo">
+                        ThamiFin
+                    </h2>
+                    <button class="close-sidebar-btn" id="closeSidebarBtn" title="Fechar menu">
+                        <span class="material-symbols-outlined">close</span>
+                    </button>
+                </div>
+                
+                <nav>
+                    <ul class="nav-links">
+                        <li class="nav-item {% if active_page == 'dashboard' %}active{% endif %}">
+                            <a href="/dashboard">
+                                <span class="material-symbols-outlined">dashboard</span>
+                                Visão Geral
+                            </a>
+                        </li>
+                        <li class="nav-item {% if active_page == 'receitas' %}active{% endif %}">
+                            <a href="/receitas">
+                                <span class="material-symbols-outlined">trending_up</span>
+                                Receitas
+                            </a>
+                        </li>
+                        <li class="nav-item {% if active_page == 'custos' %}active{% endif %}">
+                            <a href="/custos">
+                                <span class="material-symbols-outlined">payments</span>
+                                Custos Fixos / Variáveis
+                            </a>
+                        </li>
+                        <li class="nav-item {% if active_page == 'parcelamentos' %}active{% endif %}">
+                            <a href="/parcelamentos">
+                                <span class="material-symbols-outlined">credit_card</span>
+                                Parcelamentos
+                            </a>
+                        </li>
+                        <li class="nav-item {% if active_page == 'graficos' %}active{% endif %}">
+                            <a href="/graficos">
+                                <span class="material-symbols-outlined">bar_chart</span>
+                                Gráficos
+                            </a>
+                        </li>
+                        <li class="nav-item {% if active_page == 'metas' %}active{% endif %}">
+                            <a href="/metas">
+                                <span class="material-symbols-outlined">star</span>
+                                Metas & Sonhos
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a href="#" id="manageCategoriesBtn">
+                                <span class="material-symbols-outlined">label</span>
+                                Categorias
+                            </a>
+                        </li>
+                    </ul>
+                </nav>
+            </div>
+            
+            <div class="sidebar-bottom" style="display: flex; flex-direction: column; gap: 16px;">
+                <!-- Botão Alternador de Tema para Desktop -->
+                <div style="display: flex; justify-content: flex-end; padding-right: 8px;">
+                    <button class="theme-toggle-btn" id="desktopThemeToggleBtn" title="Alternar tema">
+                        <span class="material-symbols-outlined" id="desktopThemeToggleIcon">dark_mode</span>
+                    </button>
+                </div>
+                <div class="user-badge">
+                    <span class="material-symbols-outlined" style="font-size: 32px; color: var(--md-sys-color-primary);">account_circle</span>
+                    <div class="user-info" style="flex-grow: 1;">
+                        <h4 id="userNameDisplay">Carregando...</h4>
+                        <p>Carteira Pessoal</p>
+                    </div>
+                    <a href="/auth/logout" style="color: var(--md-sys-color-error); display: flex;" title="Sair">
+                        <span class="material-symbols-outlined">logout</span>
+                    </a>
+                </div>
+            </div>
+        </aside>
+        
+        <!-- PAINEL DE CONTEÚDO PRINCIPAL -->
+        <main class="m3-main-content">
+            
+            <!-- CABEÇALHO DO PAINEL -->
+            <header class="header-dashboard" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 16px; margin-bottom: 24px;">
+                <div class="header-title">
+                    <h1>Simulador de Futuro & Metas</h1>
+                    <p>Planeje a conquista de seus sonhos simulando suas economias a longo prazo.</p>
+                </div>
+                
+                <div style="display: flex; gap: 12px;">
+                    <button class="m3-btn m3-btn-secondary" id="openIncomeModalBtn" style="display: flex; align-items: center; gap: 8px; width: auto; background-color: var(--md-sys-color-surface-container-high);">
+                        <span class="material-symbols-outlined">add_circle</span>
+                        Receita Futura
+                    </button>
+                    <button class="m3-btn m3-btn-primary" id="openGoalModalBtn" style="display: flex; align-items: center; gap: 8px; width: auto;">
+                        <span class="material-symbols-outlined">star</span>
+                        Nova Meta
+                    </button>
+                </div>
+            </header>
+
+            <!-- SIMULADOR DINÂMICO CONTROLES -->
+            <section class="m3-card" style="padding: 24px; margin-bottom: 24px; display: flex; flex-direction: column; gap: 16px; background-color: var(--md-sys-color-surface-container-low);">
+                <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px;">
+                    <h3 style="font-size: 16px; font-weight: 600; display: flex; align-items: center; gap: 8px; margin: 0;">
+                        <span class="material-symbols-outlined" style="color: var(--md-sys-color-primary);">tune</span>
+                        Simulador de Cenários
+                    </h3>
+                    <span style="font-size: 12px; color: var(--md-sys-color-outline); font-weight: 500;">Ajuste o slider para simular reduções de despesas</span>
+                </div>
+                <div style="display: flex; align-items: center; gap: 20px; flex-wrap: wrap; width: 100%;">
+                    <div style="display: flex; flex-direction: column; gap: 4px; flex-grow: 1; min-width: 250px;">
+                        <div style="display: flex; justify-content: space-between; font-size: 14px; font-weight: 600;">
+                            <span>Média de Despesas Mensais Ajustada:</span>
+                            <span id="sliderValueText" style="color: var(--md-sys-color-primary);">R$ 0,00</span>
+                        </div>
+                        <input type="range" id="expenseSlider" min="500" max="15000" step="100" style="width: 100%; height: 6px; border-radius: 3px; outline: none; cursor: pointer; accent-color: var(--md-sys-color-primary);">
+                        <div style="display: flex; justify-content: space-between; font-size: 11px; color: var(--md-sys-color-outline); font-weight: 600;">
+                            <span>Cenário Econômico (R$ 500)</span>
+                            <span id="historicalAvgMarker" style="color: var(--md-sys-color-secondary);">Média Real Histórica</span>
+                            <span>Cenário Gastador (R$ 15.000)</span>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- RESUMO ESTIMADO DE FUTURO (KPIs) -->
+            <section class="finance-grid" style="grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); margin-bottom: 24px;">
+                <!-- Poupança Mensal Projeta -->
+                <div class="m3-card consolidated-card" style="border-left: 5px solid var(--md-sys-color-primary);">
+                    <div class="card-header-bank">
+                        <h3 style="font-weight: 500;">Poupança Mensal Estimada</h3>
+                        <span class="material-symbols-outlined" style="font-size: 28px; color: var(--md-sys-color-primary);">savings</span>
+                    </div>
+                    <div class="balance-display" id="estimatedSavingsDisplay">R$ 0,00</div>
+                    <p style="font-size: 13px; opacity: 0.8;">Receitas - Média de Gastos simulada</p>
+                </div>
+
+                <!-- Saldo Estimado em 12 Meses -->
+                <div class="m3-card consolidated-card" style="background: linear-gradient(135deg, var(--md-sys-color-secondary-container) 0%, var(--md-sys-color-surface-container-low) 100%); border-left: 5px solid var(--md-sys-color-secondary);">
+                    <div class="card-header-bank">
+                        <h3 style="font-weight: 500; color: var(--md-sys-color-on-secondary-container);">Patrimônio em 12 Meses</h3>
+                        <span class="material-symbols-outlined" style="font-size: 28px; color: var(--md-sys-color-secondary);">timeline</span>
+                    </div>
+                    <div class="balance-display" id="twelveMonthBalanceDisplay" style="color: var(--md-sys-color-secondary);">R$ 0,00</div>
+                    <p style="font-size: 13px; opacity: 0.8; color: var(--md-sys-color-on-secondary-container);">Saldo acumulado projetado</p>
+                </div>
+
+                <!-- Sonhos Conquistados -->
+                <div class="m3-card consolidated-card" id="goalsKPI" style="border-left: 5px solid #FF7A00;">
+                    <div class="card-header-bank">
+                        <h3 style="font-weight: 500;">Sonhos Viabilizados</h3>
+                        <span class="material-symbols-outlined" style="font-size: 28px; color: #FF7A00;">military_tech</span>
+                    </div>
+                    <div class="balance-display" id="goalsStatusDisplay" style="color: #FF7A00;">0 / 0</div>
+                    <p style="font-size: 13px; opacity: 0.8;">Metas alcançadas dentro do prazo</p>
+                </div>
+            </section>
+
+            <!-- GRÁFICO DE PROJEÇÃO DE SALDO 24 MESES -->
+            <section class="m3-card" style="padding: 24px; margin-bottom: 24px; height: 380px; display: flex; flex-direction: column;">
+                <h3 style="font-size: 16px; font-weight: 600; margin-bottom: 12px; display: flex; align-items: center; gap: 8px;">
+                    <span class="material-symbols-outlined" style="color: var(--md-sys-color-primary);">trending_up</span>
+                    Projeção Dinâmica do Saldo Acumulado (24 Meses)
+                </h3>
+                <div style="flex-grow: 1; position: relative; height: 100%;">
+                    <canvas id="projectionChart"></canvas>
+                </div>
+            </section>
+
+            <!-- SUB-GRADE: RECEITAS E METAS -->
+            <section style="display: grid; grid-template-columns: 1fr; gap: 24px; margin-bottom: 40px;" class="grid-layout-metas-split">
+                <!-- Seção Esquerda: Receitas Futuras -->
+                <div class="m3-card" style="padding: 24px;">
+                    <div class="card-header-bank" style="border-bottom: 1px solid var(--md-sys-color-outline-variant); padding-bottom: 12px; margin-bottom: 16px;">
+                        <h3 style="font-weight: 600; display: flex; align-items: center; gap: 8px; margin: 0; font-size: 16px;">
+                            <span class="material-symbols-outlined" style="color: var(--md-sys-color-secondary);">payments</span>
+                            Receitas Estimadas
+                        </h3>
+                    </div>
+                    
+                    <div class="tx-table-container" style="max-height: 250px; overflow-y: auto;">
+                        <table class="tx-table" style="font-size: 13px;">
+                            <thead>
+                                <tr>
+                                    <th>Descrição</th>
+                                    <th>Tipo</th>
+                                    <th>Dia</th>
+                                    <th>Valor</th>
+                                    <th></th>
+                                </tr>
+                            </thead>
+                            <tbody id="incomesList">
+                                <!-- Carregado via JS -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Seção Direita: Seus Objetivos / Metas -->
+                <div class="m3-card" style="padding: 24px;">
+                    <div class="card-header-bank" style="border-bottom: 1px solid var(--md-sys-color-outline-variant); padding-bottom: 12px; margin-bottom: 16px;">
+                        <h3 style="font-weight: 600; display: flex; align-items: center; gap: 8px; margin: 0; font-size: 16px;">
+                            <span class="material-symbols-outlined" style="color: #FF7A00;">star</span>
+                            Objetivos & Sonhos
+                        </h3>
+                    </div>
+
+                    <div id="goalsGrid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 16px; max-height: 400px; overflow-y: auto; padding: 4px;">
+                        <!-- Carregado via JS -->
+                    </div>
+                </div>
+            </section>
+
+        </main>
+    </div>
+
+    <!-- MODAL DE CADASTRO DE RECEITA FUTURA -->
+    <div class="modal-backdrop" id="modalOverlayIncome"></div>
+    <div class="m3-modal" id="newIncomeModal" style="max-width: 440px;">
+        <div class="card-header-bank" style="border-bottom: 1px solid var(--md-sys-color-outline-variant); padding-bottom: 12px; margin-bottom: 16px;">
+            <h3 style="font-weight: 600; display: flex; align-items: center; gap: 8px; margin: 0; font-size: 18px;">
+                <span class="material-symbols-outlined" style="color: var(--md-sys-color-primary);">payments</span>
+                Nova Receita Estimada
+            </h3>
+            <button class="close-sidebar-btn" id="closeIncomeModalBtn" style="display: flex;" title="Fechar">
+                <span class="material-symbols-outlined">close</span>
+            </button>
+        </div>
+        
+        <form id="newIncomeForm" style="display: flex; flex-direction: column; gap: 16px;">
+            <div style="display: flex; flex-direction: column; gap: 6px;">
+                <label for="incomeDescription" style="font-size: 13px; font-weight: 600; color: var(--md-sys-color-outline);">Descrição / Origem:</label>
+                <input type="text" id="incomeDescription" placeholder="Ex: Salário Dennis, Salário Thami, Freelance" required class="filter-select" style="border-radius: var(--md-shape-corner-medium); padding: 10px 16px; border: 1px solid var(--md-sys-color-outline-variant); background: var(--md-sys-color-surface);">
+            </div>
+
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+                <div style="display: flex; flex-direction: column; gap: 6px;">
+                    <label for="incomeAmount" style="font-size: 13px; font-weight: 600; color: var(--md-sys-color-outline);">Valor (R$):</label>
+                    <input type="number" id="incomeAmount" step="0.01" min="0.01" placeholder="Ex: 5000.00" required class="filter-select" style="border-radius: var(--md-shape-corner-medium); padding: 10px 16px; border: 1px solid var(--md-sys-color-outline-variant); background: var(--md-sys-color-surface);">
+                </div>
+
+                <div style="display: flex; flex-direction: column; gap: 6px;">
+                    <label for="incomeDay" style="font-size: 13px; font-weight: 600; color: var(--md-sys-color-outline);">Dia de Recebimento:</label>
+                    <input type="number" id="incomeDay" min="1" max="31" value="5" required class="filter-select" style="border-radius: var(--md-shape-corner-medium); padding: 10px 16px; border: 1px solid var(--md-sys-color-outline-variant); background: var(--md-sys-color-surface);">
+                </div>
+            </div>
+
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+                <div style="display: flex; flex-direction: column; gap: 6px;">
+                    <label for="incomeRecurrent" style="font-size: 13px; font-weight: 600; color: var(--md-sys-color-outline);">Recorrência:</label>
+                    <select id="incomeRecurrent" class="filter-select" style="border-radius: var(--md-shape-corner-medium); padding: 10px 16px; border: 1px solid var(--md-sys-color-outline-variant); background: var(--md-sys-color-surface);">
+                        <option value="true">Mensal (Recorrente)</option>
+                        <option value="false">Único (Pontual)</option>
+                    </select>
+                </div>
+
+                <div style="display: flex; flex-direction: column; gap: 6px;">
+                    <label for="incomeStartDate" style="font-size: 13px; font-weight: 600; color: var(--md-sys-color-outline);">Mês de Início:</label>
+                    <input type="date" id="incomeStartDate" required class="filter-select" style="border-radius: var(--md-shape-corner-medium); padding: 10px 16px; border: 1px solid var(--md-sys-color-outline-variant); background: var(--md-sys-color-surface);">
+                </div>
+            </div>
+
+            <button type="submit" class="m3-btn m3-btn-primary" style="margin-top: 8px;">Cadastrar Receita</button>
+        </form>
+    </div>
+
+    <!-- MODAL DE CADASTRO DE META / SONHO -->
+    <div class="modal-backdrop" id="modalOverlayGoal"></div>
+    <div class="m3-modal" id="newGoalModal" style="max-width: 440px;">
+        <div class="card-header-bank" style="border-bottom: 1px solid var(--md-sys-color-outline-variant); padding-bottom: 12px; margin-bottom: 16px;">
+            <h3 style="font-weight: 600; display: flex; align-items: center; gap: 8px; margin: 0; font-size: 18px;">
+                <span class="material-symbols-outlined" style="color: var(--md-sys-color-primary);">star</span>
+                Novo Objetivo / Sonho
+            </h3>
+            <button class="close-sidebar-btn" id="closeGoalModalBtn" style="display: flex;" title="Fechar">
+                <span class="material-symbols-outlined">close</span>
+            </button>
+        </div>
+        
+        <form id="newGoalForm" style="display: flex; flex-direction: column; gap: 16px;">
+            <div style="display: flex; flex-direction: column; gap: 6px;">
+                <label for="goalName" style="font-size: 13px; font-weight: 600; color: var(--md-sys-color-outline);">O que você deseja conquistar?</label>
+                <input type="text" id="goalName" placeholder="Ex: Viagem de Férias, Carro Novo, Entrada de Imóvel" required class="filter-select" style="border-radius: var(--md-shape-corner-medium); padding: 10px 16px; border: 1px solid var(--md-sys-color-outline-variant); background: var(--md-sys-color-surface);">
+            </div>
+
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+                <div style="display: flex; flex-direction: column; gap: 6px;">
+                    <label for="goalTargetAmount" style="font-size: 13px; font-weight: 600; color: var(--md-sys-color-outline);">Valor da Meta (R$):</label>
+                    <input type="number" id="goalTargetAmount" step="0.01" min="0.01" placeholder="Ex: 10000.00" required class="filter-select" style="border-radius: var(--md-shape-corner-medium); padding: 10px 16px; border: 1px solid var(--md-sys-color-outline-variant); background: var(--md-sys-color-surface);">
+                </div>
+
+                <div style="display: flex; flex-direction: column; gap: 6px;">
+                    <label for="goalTargetDate" style="font-size: 13px; font-weight: 600; color: var(--md-sys-color-outline);">Data Limite desejada:</label>
+                    <input type="date" id="goalTargetDate" required class="filter-select" style="border-radius: var(--md-shape-corner-medium); padding: 10px 16px; border: 1px solid var(--md-sys-color-outline-variant); background: var(--md-sys-color-surface);">
+                </div>
+            </div>
+
+            <div style="display: flex; flex-direction: column; gap: 6px;">
+                <label for="goalCategory" style="font-size: 13px; font-weight: 600; color: var(--md-sys-color-outline);">Categoria do Objetivo:</label>
+                <select id="goalCategory" class="filter-select" style="border-radius: var(--md-shape-corner-medium); padding: 10px 16px; border: 1px solid var(--md-sys-color-outline-variant); background: var(--md-sys-color-surface);">
+                    <option value="Lazer">Lazer / Viagem</option>
+                    <option value="Bens">Bens (Carro, Eletro, Moto)</option>
+                    <option value="Moradia">Moradia (Reforma, Casa)</option>
+                    <option value="Investimentos">Investimento / Reserva</option>
+                    <option value="Outros">Outros</option>
+                </select>
+            </div>
+
+            <button type="submit" class="m3-btn m3-btn-primary" style="margin-top: 8px;">Cadastrar Objetivo</button>
+        </form>
+    </div>
+
+    <!-- BACKDROP E MODAL DE GERENCIAMENTO DE CATEGORIAS -->
+    <div class="modal-backdrop" id="modalOverlayCategories"></div>
+    <div class="m3-modal" id="categoriesModal">
+        <div class="card-header-bank" style="border-bottom: 1px solid var(--md-sys-color-outline-variant); padding-bottom: 12px; margin-bottom: 12px;">
+            <h3 style="font-weight: 600; display: flex; align-items: center; gap: 8px; margin: 0;">
+                <span class="material-symbols-outlined" style="color: var(--md-sys-color-primary); font-size: 24px;">label</span>
+                Categorias
+            </h3>
+            <button class="close-sidebar-btn" id="closeCategoriesModalBtn" style="display: flex;" title="Fechar">
+                <span class="material-symbols-outlined">close</span>
+            </button>
+        </div>
+        
+        <div style="display: flex; flex-direction: column; gap: 8px;">
+            <label for="newCategoryName" style="font-size: 13px; font-weight: 600; color: var(--md-sys-color-outline);">Nova Categoria:</label>
+            <div style="display: flex; gap: 8px;">
+                <input type="text" id="newCategoryName" placeholder="Ex: Educação, Doações" class="filter-select" style="flex-grow: 1; border-radius: var(--md-shape-corner-medium); padding: 8px 16px;">
+                <button class="m3-btn m3-btn-primary" id="addCategoryBtn" style="width: auto; padding: 10px 16px;">Criar</button>
+            </div>
+        </div>
+
+        <div style="display: flex; flex-direction: column; gap: 8px; margin-top: 8px;">
+            <span style="font-size: 13px; font-weight: 600; color: var(--md-sys-color-outline);">Categorias Existentes:</span>
+            <div id="modalCategoriesList" style="max-height: 180px; overflow-y: auto; display: flex; flex-wrap: wrap; gap: 8px; padding: 12px; background-color: var(--md-sys-color-surface-container); border-radius: var(--md-shape-corner-medium); border: 1px solid var(--md-sys-color-outline-variant);">
+                <!-- Populado via JS -->
+            </div>
+        </div>
+    </div>
+
+    <!-- SCRIPT CENTRAL JS -->
+    <script src="/static/js/metas.js"></script>
+    <script src="/static/js/categories_modal.js"></script>
+</body>
+</html>

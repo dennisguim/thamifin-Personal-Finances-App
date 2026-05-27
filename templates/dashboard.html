@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Painel - ThamiFin</title>
+    <!-- Google Fonts & Material Symbols -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0" rel="stylesheet">
+    <!-- Chart.js para Visualização de Gráficos -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="stylesheet" href="/static/css/style.css">
+</head>
+<body>
+    <script>
+        // Inicializa o tema imediatamente para evitar flashes de cor
+        const savedTheme = localStorage.getItem("theme");
+        const systemPrefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
+        if (savedTheme === "dark" || (!savedTheme && systemPrefersDark)) {
+            document.body.classList.add("dark-mode");
+        }
+    </script>
+
+    <!-- OVERLAY DE BACKDROP DA SIDEBAR MOBILE -->
+    <div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+    <!-- CABEÇALHO DO MOBILE -->
+    <header class="mobile-header">
+        <button class="hamburger-btn" id="mobileMenuBtn" title="Menu lateral">
+            <span class="material-symbols-outlined">menu</span>
+        </button>
+        <div class="mobile-brand">
+            <img src="/static/thami-logo.png" alt="ThamiFin Logo" class="mobile-logo">
+            <span>ThamiFin</span>
+        </div>
+        <button class="theme-toggle-btn" id="mobileThemeToggleBtn" title="Alternar tema">
+            <span class="material-symbols-outlined" id="mobileThemeToggleIcon">dark_mode</span>
+        </button>
+    </header>
+
+    <div class="dashboard-layout">
+        
+        <!-- SIDEBAR DE NAVEGAÇÃO LATERAL (NAVIGATION RAIL) -->
+        <aside class="m3-sidebar" id="dashboardSidebar">
+            <div class="sidebar-top">
+                <div class="logo-section">
+                    <h2>
+                        <img src="/static/thami-logo.png" alt="ThamiFin Logo" class="sidebar-logo">
+                        ThamiFin
+                    </h2>
+                    <button class="close-sidebar-btn" id="closeSidebarBtn" title="Fechar menu">
+                        <span class="material-symbols-outlined">close</span>
+                    </button>
+                </div>
+                
+                <nav>
+                    <ul class="nav-links">
+                        <li class="nav-item {% if active_page == 'dashboard' %}active{% endif %}">
+                            <a href="/dashboard">
+                                <span class="material-symbols-outlined">dashboard</span>
+                                Visão Geral
+                            </a>
+                        </li>
+                        <li class="nav-item {% if active_page == 'receitas' %}active{% endif %}">
+                            <a href="/receitas">
+                                <span class="material-symbols-outlined">trending_up</span>
+                                Receitas
+                            </a>
+                        </li>
+                        <li class="nav-item {% if active_page == 'custos' %}active{% endif %}">
+                            <a href="/custos">
+                                <span class="material-symbols-outlined">payments</span>
+                                Custos Fixos / Variáveis
+                            </a>
+                        </li>
+                        <li class="nav-item {% if active_page == 'parcelamentos' %}active{% endif %}">
+                            <a href="/parcelamentos">
+                                <span class="material-symbols-outlined">credit_card</span>
+                                Parcelamentos
+                            </a>
+                        </li>
+                        <li class="nav-item {% if active_page == 'graficos' %}active{% endif %}">
+                            <a href="/graficos">
+                                <span class="material-symbols-outlined">bar_chart</span>
+                                Gráficos
+                            </a>
+                        </li>
+                        <li class="nav-item {% if active_page == 'metas' %}active{% endif %}">
+                            <a href="/metas">
+                                <span class="material-symbols-outlined">star</span>
+                                Metas & Sonhos
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a href="#" id="manageCategoriesBtn">
+                                <span class="material-symbols-outlined">label</span>
+                                Categorias
+                            </a>
+                        </li>
+                    </ul>
+                </nav>
+            </div>
+            
+            <div class="sidebar-bottom" style="display: flex; flex-direction: column; gap: 16px;">
+                <!-- Botão Alternador de Tema para Desktop -->
+                <div style="display: flex; justify-content: flex-end; padding-right: 8px;">
+                    <button class="theme-toggle-btn" id="desktopThemeToggleBtn" title="Alternar tema">
+                        <span class="material-symbols-outlined" id="desktopThemeToggleIcon">dark_mode</span>
+                    </button>
+                </div>
+                <div class="user-badge">
+                    <span class="material-symbols-outlined" style="font-size: 32px; color: var(--md-sys-color-primary);">account_circle</span>
+                    <div class="user-info" style="flex-grow: 1;">
+                        <h4 id="userNameDisplay">Carregando...</h4>
+                        <p>Carteira Pessoal</p>
+                    </div>
+                    <a href="/auth/logout" style="color: var(--md-sys-color-error); display: flex;" title="Sair">
+                        <span class="material-symbols-outlined">logout</span>
+                    </a>
+                </div>
+            </div>
+        </aside>
+        
+        <!-- PAINEL DE CONTEÚDO PRINCIPAL -->
+        <main class="m3-main-content">
+            
+            <!-- CABEÇALHO DO PAINEL -->
+            <header class="header-dashboard">
+                <div class="header-title">
+                    <h1 id="welcomeMessage">Bem-vindo de volta!</h1>
+                    <p>Aqui está o resumo financeiro consolidado das suas contas.</p>
+                </div>
+            </header>
+
+            <!-- GRADE COM CARDS FINANCEIROS (BANCOS) -->
+            <section class="finance-grid" id="accountsGrid">
+                
+                <!-- CARD CONSOLIDADO (SALDO GERAL) -->
+                <div class="m3-card consolidated-card">
+                    <div class="card-header-bank">
+                        <h3 style="font-weight: 500;">Patrimônio Total</h3>
+                        <span class="material-symbols-outlined" style="font-size: 28px;">account_balance_wallet</span>
+                    </div>
+                    <div class="balance-display" id="totalBalanceDisplay">R$ 0,00</div>
+                    <p style="font-size: 13px; opacity: 0.8;">Soma de saldos de todas as contas</p>
+                </div>
+
+                <!-- CARDS DE CONTAS SERÃO RENDERIZADOS AQUI PELO JS -->
+                
+            </section>
+
+            <!-- SEÇÃO DE GRÁFICOS (CHART.JS) -->
+            <section class="charts-section">
+                <!-- Gráfico de Categoria (Rosca) -->
+                <div class="chart-card">
+                    <h3 style="font-size: 16px; font-weight: 600;">Despesas por Categoria</h3>
+                    <div style="flex-grow: 1; position: relative; height: 100%; display: flex; align-items: center; justify-content: center;">
+                        <canvas id="categoryChart"></canvas>
+                    </div>
+                </div>
+
+                <!-- Gráfico de Balanço (Linha) -->
+                <div class="chart-card">
+                    <h3 style="font-size: 16px; font-weight: 600;">Evolução do Saldo Consolidado</h3>
+                    <div style="flex-grow: 1; position: relative; height: 100%;">
+                        <canvas id="evolutionChart"></canvas>
+                    </div>
+                </div>
+            </section>
+
+            <!-- LISTAGEM DE TRANSAÇÕES -->
+            <section class="transactions-section">
+                <div class="section-header">
+                    <h3 style="font-size: 18px; font-weight: 600;">Últimas Movimentações</h3>
+                    <span class="material-symbols-outlined" style="color: var(--md-sys-color-secondary);">filter_list</span>
+                </div>
+                
+                <div class="tx-table-container">
+                    <table class="tx-table">
+                        <thead>
+                            <tr>
+                                <th>Data</th>
+                                <th>Banco</th>
+                                <th>Descrição</th>
+                                <th>Categoria</th>
+                                <th>Valor</th>
+                            </tr>
+                        </thead>
+                        <tbody id="transactionsList">
+                            <tr>
+                                <td colspan="5" style="text-align: center; color: var(--md-sys-color-outline); padding: 32px;">
+                                    Nenhum extrato importado ainda. Faça upload de arquivos OFX acima!
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+
+        </main>
+    </div>
+
+    <!-- BACKDROP E MODAL DE GERENCIAMENTO DE CATEGORIAS -->
+    <div class="modal-backdrop" id="modalOverlay"></div>
+    <div class="m3-modal" id="categoriesModal">
+        <div class="card-header-bank" style="border-bottom: 1px solid var(--md-sys-color-outline-variant); padding-bottom: 12px; margin-bottom: 12px;">
+            <h3 style="font-weight: 600; display: flex; align-items: center; gap: 8px; margin: 0;">
+                <span class="material-symbols-outlined" style="color: var(--md-sys-color-primary); font-size: 24px;">label</span>
+                Categorias
+            </h3>
+            <button class="close-sidebar-btn" id="closeCategoriesModalBtn" style="display: flex;" title="Fechar">
+                <span class="material-symbols-outlined">close</span>
+            </button>
+        </div>
+        
+        <div style="display: flex; flex-direction: column; gap: 8px;">
+            <label for="newCategoryName" style="font-size: 13px; font-weight: 600; color: var(--md-sys-color-outline);">Nova Categoria:</label>
+            <div style="display: flex; gap: 8px;">
+                <input type="text" id="newCategoryName" placeholder="Ex: Educação, Doações" class="filter-select" style="flex-grow: 1; border-radius: var(--md-shape-corner-medium); padding: 8px 16px;">
+                <button class="m3-btn m3-btn-primary" id="addCategoryBtn" style="width: auto; padding: 10px 16px;">Criar</button>
+            </div>
+        </div>
+
+        <div style="display: flex; flex-direction: column; gap: 8px; margin-top: 8px;">
+            <span style="font-size: 13px; font-weight: 600; color: var(--md-sys-color-outline);">Categorias Existentes:</span>
+            <div id="modalCategoriesList" style="max-height: 180px; overflow-y: auto; display: flex; flex-wrap: wrap; gap: 8px; padding: 12px; background-color: var(--md-sys-color-surface-container); border-radius: var(--md-shape-corner-medium); border: 1px solid var(--md-sys-color-outline-variant);">
+                <!-- Populado via JS -->
+            </div>
+        </div>
+    </div>
+
+    <!-- SCRIPT CENTRAL JS -->
+    <script src="/static/js/app.js"></script>
+    <script src="/static/js/categories_modal.js"></script>
+</body>
+</html>

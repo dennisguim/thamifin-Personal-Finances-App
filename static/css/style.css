@@ -1,0 +1,1044 @@
+/* --- MATERIAL DESIGN 3 DESIGN SYSTEM --- */
+
+/* --- MATERIAL DESIGN 3 DESIGN SYSTEM --- */
+
+:root {
+    /* --- LIGHT THEME VARIABLES (Default) --- */
+    --md-sys-color-primary: #48b9c7; /* Pop!_OS Cyan */
+    --md-sys-color-on-primary: #FFFFFF;
+    --md-sys-color-primary-container: #E0F7FA;
+    --md-sys-color-on-primary-container: #00363D;
+    
+    --md-sys-color-secondary: #008080; /* Pop!_OS Teal */
+    --md-sys-color-on-secondary: #FFFFFF;
+    --md-sys-color-secondary-container: #E0F2F1;
+    --md-sys-color-on-secondary-container: #002D2D;
+    
+    --md-sys-color-surface: #F4F6F9; /* Light greyish-cyan background */
+    --md-sys-color-on-surface: #1e293b;
+    --md-sys-color-surface-container: #EEEFF4;
+    --md-sys-color-surface-container-low: #ffffff; /* White panels for high quality card feel */
+    --md-sys-color-surface-container-high: #E2E8F0;
+    
+    --md-sys-color-outline: #64748b;
+    --md-sys-color-outline-variant: #cbd5e1;
+    
+    /* Cores de Feedback */
+    --md-sys-color-error: #BA1A1A;
+    --md-sys-color-success: #006E3C;
+    --md-sys-color-income: #00874e;
+    --md-sys-color-expense: #d32f2f;
+    
+    /* Tipografia e Bordas */
+    --md-shape-corner-medium: 12px;
+    --md-shape-corner-large: 20px;
+    --md-shape-corner-extra-large: 28px;
+    --md-elevation-1: 0px 1px 3px 1px rgba(0,0,0,0.08), 0px 1px 2px 0px rgba(0,0,0,0.04);
+    --md-elevation-2: 0px 4px 12px 0px rgba(0,0,0,0.05), 0px 2px 4px 0px rgba(0,0,0,0.02);
+    
+    --font-family: 'Inter', system-ui, -apple-system, sans-serif;
+    
+    /* Transition standard for smooth theme switching */
+    --theme-transition: background-color 0.3s ease, border-color 0.3s ease, color 0.3s ease, box-shadow 0.3s ease;
+}
+
+/* --- DARK THEME VARIABLES --- */
+body.dark-mode {
+    --md-sys-color-surface: #20222a; /* Dark Pop!_OS background */
+    --md-sys-color-on-surface: #f1f5f9;
+    --md-sys-color-surface-container: #1b1c22;
+    --md-sys-color-surface-container-low: #2a2c35; /* Dark Pop!_OS panels */
+    --md-sys-color-surface-container-high: #3f4452;
+    
+    --md-sys-color-primary-container: #1b4b52;
+    --md-sys-color-on-primary-container: #E0F7FA;
+    
+    --md-sys-color-secondary-container: #0c4e4e;
+    --md-sys-color-on-secondary-container: #E0F2F1;
+    
+    --md-sys-color-outline: #94a3b8;
+    --md-sys-color-outline-variant: #475569;
+    
+    --md-elevation-1: 0px 2px 4px rgba(0, 0, 0, 0.2);
+    --md-elevation-2: 0px 8px 16px rgba(0, 0, 0, 0.3);
+}
+
+/* --- ESTILOS DE BASE --- */
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    font-family: var(--font-family);
+    background-color: var(--md-sys-color-surface);
+    color: var(--md-sys-color-on-surface);
+    line-height: 1.5;
+    transition: var(--theme-transition);
+}
+
+/* --- TELA DE LOGIN M3 --- */
+.login-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    padding: 20px;
+    background: linear-gradient(135deg, var(--md-sys-color-primary-container) 0%, var(--md-sys-color-surface) 100%);
+}
+
+.login-card {
+    background-color: var(--md-sys-color-surface-container-low);
+    padding: 40px;
+    border-radius: var(--md-shape-corner-extra-large);
+    box-shadow: var(--md-elevation-2);
+    width: 100%;
+    max-width: 460px;
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+    transition: transform 0.2s ease, var(--theme-transition);
+}
+
+.login-card:hover {
+    transform: translateY(-2px);
+}
+
+.brand-header {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    margin-bottom: 8px;
+    position: relative;
+}
+
+.login-logo {
+    max-height: 130px;
+    max-width: 320px;
+    margin-bottom: 16px;
+    object-fit: contain;
+}
+
+.brand-header h1 {
+    font-size: 28px;
+    color: var(--md-sys-color-primary);
+    font-weight: 700;
+}
+
+.brand-header p {
+    font-size: 14px;
+    color: var(--md-sys-color-secondary);
+}
+
+/* --- ENTRADAS DE TEXTO M3 (OUTLINE) --- */
+.m3-text-field {
+    position: relative;
+    width: 100%;
+    margin-top: 8px;
+}
+
+.m3-text-field input {
+    width: 100%;
+    padding: 16px;
+    border: 1.5px solid var(--md-sys-color-outline-variant);
+    border-radius: var(--md-shape-corner-medium);
+    background: transparent;
+    font-size: 16px;
+    color: var(--md-sys-color-on-surface);
+    outline: none;
+    transition: border-color 0.2s, box-shadow 0.2s, var(--theme-transition);
+}
+
+.m3-text-field label {
+    position: absolute;
+    left: 16px;
+    top: 50%;
+    transform: translateY(-50%);
+    background-color: var(--md-sys-color-surface-container-low);
+    padding: 0 4px;
+    color: var(--md-sys-color-outline);
+    transition: 0.2s ease all, var(--theme-transition);
+    pointer-events: none;
+}
+
+.m3-text-field input:focus, 
+.m3-text-field input:not(:placeholder-shown) {
+    border-color: var(--md-sys-color-primary);
+}
+
+.m3-text-field input:focus ~ label,
+.m3-text-field input:not(:placeholder-shown) ~ label {
+    top: 0;
+    font-size: 12px;
+    color: var(--md-sys-color-primary);
+    font-weight: 500;
+}
+
+/* --- BOTÕES M3 --- */
+.m3-btn {
+    width: 100%;
+    padding: 14px 24px;
+    border-radius: 100px;
+    border: none;
+    font-size: 15px;
+    font-weight: 600;
+    cursor: pointer;
+    display: inline-flex;
+    justify-content: center;
+    align-items: center;
+    gap: 8px;
+    transition: background-color 0.2s, box-shadow 0.2s, var(--theme-transition);
+}
+
+/* --- BOTÃO ALTERNADOR DE TEMA --- */
+.theme-toggle-btn {
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    color: var(--md-sys-color-secondary);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    transition: background-color 0.2s, color 0.2s, var(--theme-transition);
+}
+
+.theme-toggle-btn:hover {
+    background-color: var(--md-sys-color-surface-container-high);
+    color: var(--md-sys-color-primary);
+}
+
+.m3-btn-primary {
+    background-color: var(--md-sys-color-primary);
+    color: var(--md-sys-color-on-primary);
+}
+
+.m3-btn-primary:hover {
+    background-color: #004A8B;
+    box-shadow: var(--md-elevation-1);
+}
+
+.m3-btn-text {
+    background: transparent;
+    color: var(--md-sys-color-primary);
+}
+
+.m3-btn-text:hover {
+    background-color: var(--md-sys-color-primary-container);
+}
+
+.alert-message {
+    padding: 12px 16px;
+    border-radius: var(--md-shape-corner-medium);
+    font-size: 14px;
+    font-weight: 500;
+}
+
+.alert-error {
+    background-color: #FCE8E6;
+    color: var(--md-sys-color-error);
+}
+
+.alert-success {
+    background-color: #E6F4EA;
+    color: var(--md-sys-color-success);
+}
+
+/* --- LAYOUT DO DASHBOARD --- */
+.dashboard-layout {
+    display: grid;
+    grid-template-columns: 280px 1fr;
+    min-height: 100vh;
+}
+
+/* BARRA DE NAVEGAÇÃO LATERAL (NAVIGATION RAIL M3) */
+.m3-sidebar {
+    background-color: var(--md-sys-color-surface-container-low);
+    border-right: 1px solid var(--md-sys-color-outline-variant);
+    padding: 32px 16px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    transition: var(--theme-transition), transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.sidebar-top {
+    display: flex;
+    flex-direction: column;
+    gap: 32px;
+}
+
+.logo-section {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.logo-section h2 {
+    color: var(--md-sys-color-primary);
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    font-size: 22px;
+}
+
+.sidebar-logo {
+    max-height: 48px;
+    max-width: 140px;
+    object-fit: contain;
+}
+
+.close-sidebar-btn {
+    display: none; /* Apenas no mobile */
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    color: var(--md-sys-color-on-surface);
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    align-items: center;
+    justify-content: center;
+    transition: background-color 0.2s;
+}
+
+.close-sidebar-btn:hover {
+    background-color: var(--md-sys-color-surface-container-high);
+}
+
+.nav-links {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    list-style: none;
+}
+
+.nav-item a {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 16px;
+    border-radius: 100px;
+    color: var(--md-sys-color-secondary);
+    text-decoration: none;
+    font-weight: 600;
+    transition: background-color 0.2s, color 0.2s, var(--theme-transition);
+}
+
+.nav-item.active a {
+    background-color: var(--md-sys-color-primary-container);
+    color: var(--md-sys-color-on-primary-container);
+}
+
+.nav-item a:hover:not(.active) {
+    background-color: var(--md-sys-color-surface-container-high);
+}
+
+.user-badge {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 16px;
+    background-color: var(--md-sys-color-surface-container-high);
+    border-radius: var(--md-shape-corner-medium);
+    transition: var(--theme-transition);
+}
+
+.user-info h4 {
+    font-size: 14px;
+    font-weight: 600;
+}
+
+.user-info p {
+    font-size: 11px;
+    color: var(--md-sys-color-outline);
+}
+
+/* OVERLAY DE BACKDROP DA SIDEBAR MOBILE */
+.sidebar-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0, 0, 0, 0.4);
+    backdrop-filter: blur(4px);
+    z-index: 998;
+    display: none;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.sidebar-overlay.active {
+    display: block;
+    opacity: 1;
+}
+
+/* HEADER FIXO DO MOBILE */
+.mobile-header {
+    display: none; /* Oculto por padrão no Desktop */
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 16px;
+    background-color: var(--md-sys-color-surface-container-low);
+    border-bottom: 1px solid var(--md-sys-color-outline-variant);
+    position: sticky;
+    top: 0;
+    z-index: 900;
+    box-shadow: var(--md-elevation-1);
+    transition: var(--theme-transition);
+}
+
+.mobile-brand {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: var(--md-sys-color-primary);
+    font-weight: 700;
+    font-size: 18px;
+}
+
+.mobile-logo {
+    max-height: 40px;
+    max-width: 120px;
+    object-fit: contain;
+}
+
+.hamburger-btn {
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    color: var(--md-sys-color-on-surface);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    transition: background-color 0.2s, color 0.2s, var(--theme-transition);
+}
+
+.hamburger-btn:hover {
+    background-color: var(--md-sys-color-surface-container-high);
+}
+
+/* ÁREA DE CONTEÚDO PRINCIPAL */
+.m3-main-content {
+    padding: 40px;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 32px;
+    transition: var(--theme-transition);
+}
+
+.header-dashboard {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    transition: var(--theme-transition);
+}
+
+.header-title h1 {
+    font-size: 28px;
+    font-weight: 700;
+}
+
+.header-title p {
+    color: var(--md-sys-color-secondary);
+}
+
+/* GRADE DE CARDS FINANCEIROS (BANCOS) */
+.finance-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 24px;
+}
+
+.m3-card {
+    background-color: var(--md-sys-color-surface-container-low);
+    border-radius: var(--md-shape-corner-large);
+    padding: 24px;
+    border: 1px solid var(--md-sys-color-outline-variant);
+    box-shadow: var(--md-elevation-1);
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    position: relative;
+    overflow: hidden;
+}
+
+/* Estilos de bordas para identificar a identidade visual dos bancos */
+.card-nubank { border-left: 6px solid #820ad1; }
+.card-inter { border-left: 6px solid #ff7a00; }
+.card-caixa { border-left: 6px solid #005ca9; }
+
+.card-header-bank {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.card-header-bank h3 {
+    font-size: 18px;
+    font-weight: 600;
+}
+
+.balance-display {
+    font-size: 24px;
+    font-weight: 700;
+    color: var(--md-sys-color-on-surface);
+}
+
+.drag-drop-area {
+    border: 2px dashed var(--md-sys-color-outline-variant);
+    border-radius: var(--md-shape-corner-medium);
+    padding: 16px;
+    text-align: center;
+    cursor: pointer;
+    font-size: 13px;
+    color: var(--md-sys-color-secondary);
+    transition: background-color 0.2s, border-color 0.2s;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+}
+
+.drag-drop-area:hover, .drag-drop-area.dragover {
+    border-color: var(--md-sys-color-primary);
+    background-color: var(--md-sys-color-primary-container);
+}
+
+/* CARDS CONSOLIDADOS */
+.consolidated-card {
+    background-color: var(--md-sys-color-primary-container);
+    color: var(--md-sys-color-on-primary-container);
+    border: none;
+}
+
+/* SEÇÃO DE GRÁFICOS */
+.charts-section {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 24px;
+}
+
+@media (max-width: 1024px) {
+    .dashboard-layout {
+        grid-template-columns: 1fr;
+    }
+    
+    .mobile-header {
+        display: flex; /* Exibe o cabeçalho móvel */
+    }
+    
+    .m3-sidebar {
+        position: fixed;
+        top: 0;
+        left: 0;
+        bottom: 0;
+        width: 280px;
+        z-index: 1000;
+        transform: translateX(-100%);
+        box-shadow: none;
+    }
+    
+    .m3-sidebar.active {
+        transform: translateX(0);
+        box-shadow: 4px 0 24px rgba(0, 0, 0, 0.25);
+    }
+    
+    .close-sidebar-btn {
+        display: flex; /* Exibe o botão de fechar dentro da sidebar */
+    }
+    
+    .m3-main-content {
+        padding: 16px; /* Padding reduzido para telas menores */
+        gap: 20px;
+    }
+    
+    .header-dashboard {
+        display: none; /* Oculta o header tradicional em prol do mobile-header */
+    }
+    
+    .finance-grid {
+        grid-template-columns: 1fr;
+        gap: 16px;
+    }
+    
+    .charts-section {
+        grid-template-columns: 1fr;
+        gap: 16px;
+    }
+    
+    .chart-card {
+        min-height: 300px;
+        padding: 16px;
+    }
+    
+    .transactions-section {
+        padding: 16px;
+    }
+}
+
+.chart-card {
+    background-color: var(--md-sys-color-surface-container-low);
+    border-radius: var(--md-shape-corner-large);
+    padding: 24px;
+    border: 1px solid var(--md-sys-color-outline-variant);
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    min-height: 360px;
+}
+
+/* LISTA DE TRANSAÇÕES */
+.transactions-section {
+    background-color: var(--md-sys-color-surface-container-low);
+    border-radius: var(--md-shape-corner-large);
+    padding: 24px;
+    border: 1px solid var(--md-sys-color-outline-variant);
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.section-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.tx-table-container {
+    overflow-x: auto;
+}
+
+.tx-table {
+    width: 100%;
+    border-collapse: collapse;
+    text-align: left;
+    font-size: 14px;
+}
+
+.tx-table th {
+    padding: 12px 16px;
+    border-bottom: 2px solid var(--md-sys-color-outline-variant);
+    color: var(--md-sys-color-secondary);
+    font-weight: 600;
+}
+
+.tx-table td {
+    padding: 16px;
+    border-bottom: 1px solid var(--md-sys-color-outline-variant);
+}
+
+.tx-row:hover {
+    background-color: var(--md-sys-color-surface-container);
+}
+
+.tx-amount {
+    font-weight: 700;
+}
+
+.amount-income {
+    color: var(--md-sys-color-income);
+}
+
+.amount-expense {
+    color: var(--md-sys-color-expense);
+}
+
+/* Badge estilizada para transações via PIX (cor oficial do Banco Central) */
+.badge-pix {
+    background-color: #32b3a6;
+    color: white;
+    font-size: 10px;
+    font-weight: 700;
+    padding: 2px 6px;
+    border-radius: 4px;
+    margin-right: 6px;
+    display: inline-block;
+    vertical-align: middle;
+}
+
+/* DROP-DOWN SELECT PARA CATEGORIA M3 */
+.category-select {
+    padding: 6px 12px;
+    border-radius: 8px;
+    border: 1px solid var(--md-sys-color-outline-variant);
+    background-color: var(--md-sys-color-surface-container-low);
+    color: var(--md-sys-color-on-surface);
+    font-weight: 500;
+    cursor: pointer;
+    outline: none;
+    transition: border-color 0.2s;
+}
+
+.category-select:focus {
+    border-color: var(--md-sys-color-primary);
+}
+
+/* --- ESTILOS ADICIONAIS PARA CUSTOS E GRÁFICOS (M3) --- */
+
+/* Barra de Filtros */
+.filters-bar {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 16px;
+    align-items: center;
+    background-color: var(--md-sys-color-surface-container-low);
+    padding: 16px 24px;
+    border-radius: var(--md-shape-corner-medium);
+    border: 1px solid var(--md-sys-color-outline-variant);
+    width: 100%;
+    transition: var(--theme-transition);
+}
+
+.filter-group {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.filter-group label {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--md-sys-color-outline);
+}
+
+.filter-select {
+    padding: 8px 16px;
+    border-radius: 100px;
+    border: 1.5px solid var(--md-sys-color-outline-variant);
+    background-color: var(--md-sys-color-surface-container-low);
+    color: var(--md-sys-color-on-surface);
+    font-size: 14px;
+    font-weight: 500;
+    outline: none;
+    cursor: pointer;
+    transition: border-color 0.2s, background-color 0.2s, var(--theme-transition);
+}
+
+.filter-select:focus {
+    border-color: var(--md-sys-color-primary);
+}
+
+/* Botões Segmentados (Segmented Controls) */
+.segmented-control {
+    display: inline-flex;
+    background-color: var(--md-sys-color-surface-container);
+    border-radius: 100px;
+    padding: 4px;
+    gap: 2px;
+    border: 1px solid var(--md-sys-color-outline-variant);
+    transition: var(--theme-transition);
+}
+
+.segmented-btn {
+    background: transparent;
+    border: none;
+    border-radius: 100px;
+    padding: 6px 16px;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--md-sys-color-outline);
+    cursor: pointer;
+    transition: background-color 0.2s, color 0.2s;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.segmented-btn.active {
+    background-color: var(--md-sys-color-primary-container);
+    color: var(--md-sys-color-on-primary-container);
+    box-shadow: 0px 1px 3px rgba(0, 0, 0, 0.05);
+}
+
+.segmented-btn:hover:not(.active) {
+    background-color: var(--md-sys-color-surface-container-high);
+    color: var(--md-sys-color-on-surface);
+}
+
+/* Controle Segmentado para Tabela (Compacto) */
+.table-segmented-control {
+    padding: 2px;
+}
+
+.table-segmented-control .segmented-btn {
+    padding: 4px 10px;
+    font-size: 12px;
+}
+
+/* Progresso de Proporção (Ratio) */
+.ratio-progress-bar {
+    width: 100%;
+    height: 8px;
+    background-color: var(--md-sys-color-surface-container-high);
+    border-radius: 100px;
+    overflow: hidden;
+    position: relative;
+    margin-top: 8px;
+    transition: var(--theme-transition);
+}
+
+.ratio-progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--md-sys-color-primary) 0%, var(--md-sys-color-secondary) 100%);
+    border-radius: 100px;
+    transition: width 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* KPI Card com Detalhes Adicionais */
+.consolidated-card.fixed-cost-kpi {
+    background: linear-gradient(135deg, var(--md-sys-color-primary-container) 0%, var(--md-sys-color-secondary-container) 100%);
+    color: var(--md-sys-color-on-primary-container);
+}
+
+/* Badges de Contas/Bancos */
+.badge-bank {
+    font-size: 11px;
+    font-weight: 700;
+    padding: 2px 8px;
+    border-radius: 100px;
+    display: inline-block;
+    color: white;
+}
+
+.badge-bank-nubank { background-color: #820ad1; }
+.badge-bank-inter { background-color: #ff7a00; }
+.badge-bank-caixa { background-color: #005ca9; }
+.badge-bank-default { background-color: var(--md-sys-color-outline); }
+
+/* Card de Controle de Formato de Gráfico */
+.chart-header-controls {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 12px;
+    border-bottom: 1px solid var(--md-sys-color-outline-variant);
+    padding-bottom: 12px;
+    margin-bottom: 8px;
+}
+
+.chart-header-controls h3 {
+    font-size: 16px;
+    font-weight: 600;
+}
+
+.chart-card-flexible {
+    min-height: 400px;
+}
+
+@media (max-width: 768px) {
+    .filters-bar {
+        flex-direction: column;
+        align-items: stretch;
+        padding: 16px;
+    }
+    
+    .filter-group {
+        flex-direction: column;
+        align-items: stretch;
+    }
+    
+    .chart-header-controls {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 8px;
+    }
+}
+
+/* --- ESTILOS DO MODAL DE GERENCIAMENTO DE CATEGORIAS (M3) --- */
+
+.modal-backdrop {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0, 0, 0, 0.4);
+    backdrop-filter: blur(4px);
+    z-index: 1001;
+    display: none;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.modal-backdrop.active {
+    display: block;
+    opacity: 1;
+}
+
+.m3-modal {
+    display: none;
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 1002;
+    width: 90%;
+    max-width: 460px;
+    background-color: var(--md-sys-color-surface-container-low);
+    padding: 28px;
+    border-radius: var(--md-shape-corner-large);
+    border: 1px solid var(--md-sys-color-outline-variant);
+    box-shadow: var(--md-elevation-2);
+    flex-direction: column;
+    gap: 20px;
+    transition: var(--theme-transition);
+}
+
+.m3-modal.active {
+    display: flex !important;
+}
+
+.badge-category-modal {
+    padding: 6px 12px;
+    border-radius: 100px;
+    font-size: 13px;
+    font-weight: 500;
+    background-color: var(--md-sys-color-surface-container-high);
+    color: var(--md-sys-color-on-surface);
+    border: 1px solid var(--md-sys-color-outline-variant);
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    transition: var(--theme-transition);
+}
+
+/* --- PRODUTO: PARCELAMENTOS E VÍNCULOS --- */
+
+.installments-grid {
+    animation: fadeIn 0.4s ease-out;
+}
+
+.badge-installment {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 4px 10px;
+    border-radius: var(--md-shape-corner-medium);
+    font-size: 11px;
+    font-weight: 600;
+    background-color: var(--md-sys-color-secondary-container);
+    color: var(--md-sys-color-on-secondary-container);
+    cursor: pointer;
+    transition: background-color 0.2s ease, transform 0.2s ease;
+}
+
+.badge-installment:hover {
+    background-color: var(--md-sys-color-primary-container);
+    color: var(--md-sys-color-on-primary-container);
+    transform: scale(1.05);
+}
+
+.link-installment-action-btn {
+    background: none;
+    border: none;
+    color: var(--md-sys-color-outline);
+    cursor: pointer;
+    opacity: 0.25;
+    transition: opacity 0.2s ease, color 0.2s ease, transform 0.2s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 4px;
+    border-radius: 50%;
+}
+
+.tx-row:hover .link-installment-action-btn {
+    opacity: 0.7;
+}
+
+.link-installment-action-btn:hover {
+    opacity: 1 !important;
+    color: var(--md-sys-color-primary) !important;
+    background-color: var(--md-sys-color-surface-container-high);
+    transform: scale(1.15);
+}
+
+/* Animação suave para fade in de grid de parcelas */
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+/* --- PRODUTO: METAS & PLANEJADOR DE FUTURO --- */
+
+.grid-layout-metas-split {
+    grid-template-columns: 1fr;
+}
+@media (min-width: 1024px) {
+    .grid-layout-metas-split {
+        grid-template-columns: 1fr 1fr !important;
+    }
+}
+
+.goal-render-card {
+    background-color: var(--md-sys-color-surface-container-low);
+    border-radius: var(--md-shape-corner-medium);
+    border: 1px solid var(--md-sys-color-outline-variant);
+    box-shadow: var(--md-elevation-1);
+    transition: transform 0.2s ease, box-shadow 0.2s ease, var(--theme-transition);
+}
+
+.goal-render-card:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--md-elevation-2);
+}
+
+.card-goal-active {
+    background: linear-gradient(135deg, var(--md-sys-color-secondary-container) 0%, var(--md-sys-color-surface-container-low) 100%) !important;
+}
+
+.goal-status-on-time {
+    color: var(--md-sys-color-success);
+}
+
+.goal-status-delayed {
+    color: #FF7A00;
+}
+
+.goal-status-failed {
+    color: var(--md-sys-color-outline);
+}
+
+/* Estilos customizados para o Slider de Simulação */
+input[type=range]#expenseSlider {
+    -webkit-appearance: none;
+    background: transparent;
+}
+
+input[type=range]#expenseSlider::-webkit-slider-runnable-track {
+    width: 100%;
+    height: 8px;
+    cursor: pointer;
+    background: var(--md-sys-color-surface-container-high);
+    border-radius: 4px;
+    transition: var(--theme-transition);
+}
+
+input[type=range]#expenseSlider::-webkit-slider-thumb {
+    height: 20px;
+    width: 20px;
+    border-radius: 50%;
+    background: var(--md-sys-color-primary);
+    cursor: pointer;
+    -webkit-appearance: none;
+    margin-top: -6px;
+    box-shadow: 0px 2px 4px rgba(0,0,0,0.2);
+    transition: transform 0.1s ease, background-color 0.2s ease;
+}
+
+input[type=range]#expenseSlider::-webkit-slider-thumb:hover {
+    transform: scale(1.2);
+    background: var(--md-sys-color-secondary);
+}

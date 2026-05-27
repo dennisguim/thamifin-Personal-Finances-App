@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Acesso - ThamiFin</title>
+    <!-- Google Fonts & Material Symbols -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0" rel="stylesheet">
+    <link rel="stylesheet" href="/static/css/style.css">
+</head>
+<body>
+    <script>
+        // Inicializa o tema imediatamente para evitar flashes de cor
+        const savedTheme = localStorage.getItem("theme");
+        const systemPrefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
+        if (savedTheme === "dark" || (!savedTheme && systemPrefersDark)) {
+            document.body.classList.add("dark-mode");
+        }
+    </script>
+    <div class="login-container">
+        <!-- CARD DE AUTENTICAÇÃO M3 -->
+        <div class="login-card" id="authCard">
+            <div class="brand-header">
+                <button class="theme-toggle-btn" id="themeToggleBtn" type="button" style="position: absolute; right: 0; top: 0;" title="Alternar tema">
+                    <span class="material-symbols-outlined" id="themeToggleIcon">dark_mode</span>
+                </button>
+                <img src="/static/thami-logo.png" alt="ThamiFin Logo" class="login-logo">
+                <p id="authSubtitle" style="margin-top: 8px;">Acesse sua carteira pessoal consolidada</p>
+            </div>
+
+            <!-- Feedbacks Dinâmicos das APIs -->
+            <div id="alertBox"></div>
+
+            <!-- FORMULÁRIO DE LOGIN -->
+            <form action="/auth/login" method="POST" id="loginForm">
+                <div style="display: flex; flex-direction: column; gap: 16px;">
+                    <div class="m3-text-field">
+                        <input type="text" name="email" id="loginEmail" placeholder=" " required>
+                        <label for="loginEmail">Usuário</label>
+                    </div>
+                    
+                    <div class="m3-text-field">
+                        <input type="password" name="password" id="loginPassword" placeholder=" " required>
+                        <label for="loginPassword">Senha</label>
+                    </div>
+
+                    <button type="submit" class="m3-btn m3-btn-primary" style="margin-top: 12px;">
+                        <span class="material-symbols-outlined">login</span>
+                        Entrar no Dashboard
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        const loginForm = document.getElementById("loginForm");
+        const subtitle = document.getElementById("authSubtitle");
+        const alertBox = document.getElementById("alertBox");
+
+        // Trata alertas enviados via parâmetros URL pelo backend
+        const urlParams = new URLSearchParams(window.location.search);
+        if (urlParams.has('error')) {
+            alertBox.innerHTML = `<div class="alert-message alert-error">Credenciais incorretas. Tente novamente.</div>`;
+        }
+
+        // Lógica de alternância de tema Claro/Escuro
+        const themeToggleBtn = document.getElementById("themeToggleBtn");
+        const themeToggleIcon = document.getElementById("themeToggleIcon");
+
+        function updateToggleIcon() {
+            if (document.body.classList.contains("dark-mode")) {
+                themeToggleIcon.innerText = "light_mode";
+            } else {
+                themeToggleIcon.innerText = "dark_mode";
+            }
+        }
+
+        updateToggleIcon();
+
+        themeToggleBtn.addEventListener("click", () => {
+            document.body.classList.toggle("dark-mode");
+            const isDark = document.body.classList.contains("dark-mode");
+            localStorage.setItem("theme", isDark ? "dark" : "light");
+            updateToggleIcon();
+        });
+    </script>
+</body>
+</html>
