@@ -40,6 +40,13 @@
     
     /* Transition standard for smooth theme switching */
     --theme-transition: background-color 0.3s ease, border-color 0.3s ease, color 0.3s ease, box-shadow 0.3s ease;
+
+    /* Mobile Safe Areas and Nav Bar Height */
+    --safe-area-top: env(safe-area-inset-top, 0px);
+    --safe-area-bottom: env(safe-area-inset-bottom, 0px);
+    --safe-area-left: env(safe-area-inset-left, 0px);
+    --safe-area-right: env(safe-area-inset-right, 0px);
+    --bottom-nav-height: 64px;
 }
 
 /* --- DARK THEME VARIABLES --- */
@@ -70,12 +77,20 @@ body.dark-mode {
     padding: 0;
 }
 
+html {
+    -webkit-text-size-adjust: 100%;
+    -webkit-tap-highlight-color: transparent;
+    touch-action: manipulation;
+}
+
 body {
     font-family: var(--font-family);
     background-color: var(--md-sys-color-surface);
     color: var(--md-sys-color-on-surface);
     line-height: 1.5;
     transition: var(--theme-transition);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
 }
 
 /* --- TELA DE LOGIN M3 --- */
@@ -384,12 +399,12 @@ body {
     display: none; /* Oculto por padrão no Desktop */
     justify-content: space-between;
     align-items: center;
-    padding: 12px 16px;
+    padding: calc(10px + var(--safe-area-top)) 16px 10px 16px;
     background-color: var(--md-sys-color-surface-container-low);
     border-bottom: 1px solid var(--md-sys-color-outline-variant);
     position: sticky;
     top: 0;
-    z-index: 900;
+    z-index: 850;
     box-shadow: var(--md-elevation-1);
     transition: var(--theme-transition);
 }
@@ -404,7 +419,7 @@ body {
 }
 
 .mobile-logo {
-    max-height: 40px;
+    max-height: 38px;
     max-width: 120px;
     object-fit: contain;
 }
@@ -417,14 +432,81 @@ body {
     display: flex;
     align-items: center;
     justify-content: center;
-    width: 40px;
-    height: 40px;
+    width: 44px;
+    height: 44px;
     border-radius: 50%;
     transition: background-color 0.2s, color 0.2s, var(--theme-transition);
+    -webkit-tap-highlight-color: transparent;
 }
 
-.hamburger-btn:hover {
+.hamburger-btn:hover, .hamburger-btn:active {
     background-color: var(--md-sys-color-surface-container-high);
+}
+
+/* --- BARRA DE NAVEGAÇÃO INFERIOR MOBILE (M3 BOTTOM BAR) --- */
+.mobile-bottom-nav {
+    display: none; /* Oculto por padrão no Desktop */
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: calc(var(--bottom-nav-height) + var(--safe-area-bottom));
+    padding-bottom: var(--safe-area-bottom);
+    background-color: var(--md-sys-color-surface-container-low);
+    border-top: 1px solid var(--md-sys-color-outline-variant);
+    z-index: 880;
+    justify-content: space-around;
+    align-items: center;
+    box-shadow: 0 -2px 12px rgba(0, 0, 0, 0.08);
+    transition: var(--theme-transition);
+    user-select: none;
+}
+
+.bottom-nav-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 2px;
+    background: transparent;
+    border: none;
+    color: var(--md-sys-color-outline);
+    text-decoration: none;
+    font-size: 11px;
+    font-weight: 600;
+    padding: 4px 10px;
+    cursor: pointer;
+    border-radius: 16px;
+    transition: color 0.2s ease, transform 0.1s ease;
+    min-width: 60px;
+    -webkit-tap-highlight-color: transparent;
+}
+
+.bottom-nav-item:active {
+    transform: scale(0.92);
+}
+
+.bottom-nav-item .nav-icon-pill {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 48px;
+    height: 28px;
+    border-radius: 14px;
+    transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+.bottom-nav-item .material-symbols-outlined {
+    font-size: 22px;
+}
+
+.bottom-nav-item.active {
+    color: var(--md-sys-color-primary);
+}
+
+.bottom-nav-item.active .nav-icon-pill {
+    background-color: var(--md-sys-color-primary-container);
+    color: var(--md-sys-color-on-primary-container);
 }
 
 /* ÁREA DE CONTEÚDO PRINCIPAL */
@@ -537,21 +619,30 @@ body {
     .mobile-header {
         display: flex; /* Exibe o cabeçalho móvel */
     }
+
+    .mobile-bottom-nav {
+        display: flex; /* Exibe a barra de navegação inferior */
+    }
     
     .m3-sidebar {
         position: fixed;
         top: 0;
         left: 0;
         bottom: 0;
-        width: 280px;
+        width: 290px;
+        max-width: 82vw;
         z-index: 1000;
         transform: translateX(-100%);
         box-shadow: none;
+        padding-top: calc(24px + var(--safe-area-top));
+        padding-bottom: calc(24px + var(--safe-area-bottom));
+        transition: transform 0.3s cubic-bezier(0.32, 0.72, 0, 1), box-shadow 0.3s ease;
+        overscroll-behavior: contain;
     }
     
     .m3-sidebar.active {
         transform: translateX(0);
-        box-shadow: 4px 0 24px rgba(0, 0, 0, 0.25);
+        box-shadow: 8px 0 32px rgba(0, 0, 0, 0.35);
     }
     
     .close-sidebar-btn {
@@ -559,17 +650,48 @@ body {
     }
     
     .m3-main-content {
-        padding: 16px; /* Padding reduzido para telas menores */
-        gap: 20px;
+        padding: 16px 14px calc(var(--bottom-nav-height) + var(--safe-area-bottom) + 24px) 14px;
+        gap: 18px;
     }
     
+    /* CABEÇALHO DO PAINEL NO MOBILE */
     .header-dashboard {
-        display: none; /* Oculta o header tradicional em prol do mobile-header */
+        display: flex !important;
+        flex-direction: column;
+        align-items: stretch;
+        gap: 12px;
+        margin-bottom: 4px;
+    }
+
+    .header-dashboard .header-title h1 {
+        font-size: 22px;
+        font-weight: 700;
+        line-height: 1.25;
+    }
+
+    .header-dashboard .header-title p {
+        font-size: 13px;
+        color: var(--md-sys-color-secondary);
+    }
+
+    .header-dashboard .m3-btn {
+        width: 100% !important;
+        min-height: 44px;
+        justify-content: center;
+        font-size: 14px;
     }
     
     .finance-grid {
         grid-template-columns: 1fr;
-        gap: 16px;
+        gap: 14px;
+    }
+
+    .m3-card {
+        padding: 18px;
+    }
+
+    .balance-display {
+        font-size: clamp(20px, 5.5vw, 24px);
     }
     
     .charts-section {
@@ -578,7 +700,7 @@ body {
     }
     
     .chart-card {
-        min-height: 300px;
+        min-height: 280px;
         padding: 16px;
     }
     
@@ -837,22 +959,284 @@ body {
     min-height: 400px;
 }
 
+/* ==========================================================================
+   MOBILE & TABLET EXCELLENCE SYSTEM (@media max-width: 768px)
+   ========================================================================== */
+
 @media (max-width: 768px) {
+    /* 1. FILTROS COMPACTOS & ERGONÔMICOS */
     .filters-bar {
-        flex-direction: column;
-        align-items: stretch;
-        padding: 16px;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 12px;
+        padding: 14px;
+        border-radius: var(--md-shape-corner-medium);
     }
     
     .filter-group {
+        width: 100%;
+        display: flex;
         flex-direction: column;
         align-items: stretch;
+        gap: 4px;
     }
-    
+
+    .filter-group label {
+        font-size: 12px;
+        font-weight: 600;
+        color: var(--md-sys-color-outline);
+    }
+
+    .filter-select {
+        width: 100% !important;
+        min-height: 44px; /* Tamanho mínimo de toque */
+        font-size: 15px !important;
+        padding: 8px 14px;
+    }
+
+    /* Agrupamento em colunas inteligentes para datas no mobile */
+    .filters-bar .date-dma-group {
+        width: calc(33.333% - 8px) !important;
+        display: inline-flex !important;
+    }
+
+    .filters-bar .date-range-group {
+        width: calc(50% - 6px) !important;
+        display: inline-flex !important;
+    }
+
     .chart-header-controls {
         flex-direction: column;
         align-items: flex-start;
+        gap: 10px;
+    }
+
+    .chart-header-controls .segmented-control {
+        width: 100%;
+        display: flex;
+    }
+
+    .chart-header-controls .segmented-btn {
+        flex: 1;
+        justify-content: center;
+        padding: 8px 10px;
+        font-size: 13px;
+        min-height: 38px;
+    }
+
+    /* 2. TRANSIÇÃO DE TABELAS PARA FEED DE CARDS MODERNOS */
+    .tx-table-container {
+        overflow-x: visible !important;
+    }
+    
+    .tx-table {
+        display: block !important;
+        width: 100% !important;
+    }
+    
+    .tx-table thead {
+        display: none !important; /* Oculta cabeçalhos tabulares no mobile */
+    }
+
+    .tx-table tbody {
+        display: block !important;
+        width: 100% !important;
+    }
+
+    .tx-table tr.tx-row {
+        display: flex !important;
+        flex-direction: column !important;
+        background-color: var(--md-sys-color-surface-container-low);
+        border: 1px solid var(--md-sys-color-outline-variant);
+        border-radius: var(--md-shape-corner-medium);
+        padding: 14px 16px;
+        margin-bottom: 12px;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
         gap: 8px;
+        transition: background-color 0.15s ease, transform 0.15s ease;
+        position: relative;
+    }
+
+    .tx-table tr.tx-row:active {
+        background-color: var(--md-sys-color-surface-container);
+        transform: scale(0.99);
+    }
+
+    .tx-table tr.tx-row td {
+        display: block !important;
+        padding: 0 !important;
+        border: none !important;
+        width: 100% !important;
+    }
+
+    /* Linha Superior: Data + Banco na esquerda, Valor na direita */
+    .tx-table tr.tx-row .col-date {
+        font-size: 12px;
+        color: var(--md-sys-color-outline);
+        order: 1;
+        display: inline-block !important;
+        width: auto !important;
+        float: left;
+    }
+
+    .tx-table tr.tx-row .col-bank {
+        font-size: 12px;
+        order: 2;
+        display: inline-block !important;
+        width: auto !important;
+        float: left;
+        margin-left: 8px;
+    }
+
+    .tx-table tr.tx-row .col-amount {
+        font-size: 16px !important;
+        font-weight: 700 !important;
+        order: 3;
+        width: auto !important;
+        float: right;
+        text-align: right;
+    }
+
+    .tx-table tr.tx-row::after {
+        content: "";
+        display: table;
+        clear: both;
+    }
+
+    /* Linha do Meio: Descrição com Badge */
+    .tx-table tr.tx-row .col-desc {
+        order: 4;
+        clear: both;
+        font-size: 15px;
+        font-weight: 600;
+        color: var(--md-sys-color-on-surface);
+        padding: 2px 0 6px 0 !important;
+        line-height: 1.35;
+        word-break: break-word;
+    }
+
+    /* Linha de Controles: Custo Fixo/Variável e Categoria */
+    .tx-table tr.tx-row .col-cost-type {
+        order: 5;
+        padding-top: 8px !important;
+        border-top: 1px dashed var(--md-sys-color-outline-variant) !important;
+        display: flex;
+        align-items: center;
+        width: 100%;
+    }
+
+    .tx-table tr.tx-row .col-category {
+        order: 6;
+        padding-top: 4px !important;
+        width: 100%;
+    }
+
+    .tx-table tr.tx-row:not(:has(.col-cost-type)) .col-category {
+        padding-top: 8px !important;
+        border-top: 1px dashed var(--md-sys-color-outline-variant) !important;
+    }
+
+    .tx-table tr.tx-row .category-select {
+        width: 100% !important;
+        min-height: 42px;
+        font-size: 14px;
+        padding: 8px 12px;
+        border-radius: var(--md-shape-corner-medium);
+    }
+
+    .tx-table tr.tx-row .table-segmented-control {
+        width: 100%;
+        display: flex;
+        padding: 3px;
+    }
+
+    .tx-table tr.tx-row .table-segmented-control .segmented-btn {
+        flex: 1;
+        justify-content: center;
+        min-height: 38px;
+        font-size: 13px;
+    }
+
+    /* 3. MODAIS COMO BOTTOM SHEETS NO MOBILE */
+    .m3-modal {
+        top: auto !important;
+        bottom: 0 !important;
+        left: 0 !important;
+        right: 0 !important;
+        transform: translateY(100%) !important;
+        width: 100% !important;
+        max-width: 100% !important;
+        border-radius: 24px 24px 0 0 !important;
+        padding: 16px 20px calc(24px + var(--safe-area-bottom)) 20px !important;
+        max-height: 88vh !important;
+        overflow-y: auto !important;
+        -webkit-overflow-scrolling: touch;
+        box-shadow: 0 -8px 32px rgba(0, 0, 0, 0.3) !important;
+        transition: transform 0.3s cubic-bezier(0.32, 0.72, 0, 1) !important;
+    }
+
+    .m3-modal.active {
+        transform: translateY(0) !important;
+    }
+
+    /* Barra de puxar (Drag Handle) no topo do modal */
+    .m3-modal::before {
+        content: "";
+        display: block;
+        width: 38px;
+        height: 4px;
+        border-radius: 2px;
+        background-color: var(--md-sys-color-outline-variant);
+        margin: 0 auto 14px auto;
+    }
+
+    /* 4. GRIDS DE PARCELAMENTOS E METAS NO MOBILE */
+    .installments-grid, #goalsGrid {
+        grid-template-columns: 1fr !important;
+        gap: 14px !important;
+    }
+
+    /* 5. SLIDER DE SIMULAÇÃO TOUCH FRIENDLY */
+    input[type=range]#expenseSlider::-webkit-slider-thumb {
+        height: 28px !important;
+        width: 28px !important;
+        margin-top: -10px !important;
+    }
+
+    input[type=range]#expenseSlider::-webkit-slider-runnable-track {
+        height: 10px !important;
+    }
+
+    /* 6. TELA DE LOGIN RESPONSIVA */
+    .login-container {
+        min-height: 100dvh;
+        padding: calc(16px + var(--safe-area-top)) 16px calc(16px + var(--safe-area-bottom)) 16px;
+    }
+
+    .login-card {
+        padding: 28px 20px;
+        gap: 20px;
+        border-radius: var(--md-shape-corner-large);
+    }
+
+    .login-logo {
+        max-height: 90px;
+        max-width: 240px;
+    }
+
+    .brand-header h1 {
+        font-size: 24px;
+    }
+
+    /* Inputs confortáveis com proteção contra auto-zoom no iOS */
+    .m3-text-field input {
+        font-size: 16px !important;
+        padding: 14px 16px !important;
+    }
+
+    .m3-btn {
+        min-height: 48px;
+        font-size: 15px;
     }
 }
 

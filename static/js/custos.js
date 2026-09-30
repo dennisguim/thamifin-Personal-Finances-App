@@ -384,12 +384,12 @@ function renderCostsTable(costs) {
         selectHtml += "</select>";
         
         row.innerHTML = `
-            <td style="color: var(--md-sys-color-secondary); font-weight: 500;">${tx.date}</td>
-            <td>${bankBadgeHtml}</td>
-            <td>${typeBadge}${tx.description}</td>
-            <td>${controlHtml}</td>
-            <td>${selectHtml}</td>
-            <td class="tx-amount amount-expense">${formatCurrency(tx.amount)}</td>
+            <td class="col-date" style="color: var(--md-sys-color-secondary); font-weight: 500;">${tx.date}</td>
+            <td class="col-bank">${bankBadgeHtml}</td>
+            <td class="col-desc">${typeBadge}${tx.description}</td>
+            <td class="col-cost-type">${controlHtml}</td>
+            <td class="col-category">${selectHtml}</td>
+            <td class="col-amount tx-amount amount-expense">${formatCurrency(tx.amount)}</td>
         `;
         
         listContainer.appendChild(row);
@@ -434,23 +434,35 @@ async function changeCostType(transactionId, newCostType, btnElement) {
 
 function setupResponsiveMenuAndThemes() {
     const mobileMenuBtn = document.getElementById("mobileMenuBtn");
+    const bottomNavMenuBtn = document.getElementById("bottomNavMenuBtn");
     const closeSidebarBtn = document.getElementById("closeSidebarBtn");
     const sidebarOverlay = document.getElementById("sidebarOverlay");
     const dashboardSidebar = document.getElementById("dashboardSidebar");
 
-    if (mobileMenuBtn && closeSidebarBtn && sidebarOverlay && dashboardSidebar) {
+    if (dashboardSidebar && sidebarOverlay) {
         const openSidebar = () => {
             dashboardSidebar.classList.add("active");
             sidebarOverlay.classList.add("active");
+            document.body.style.overflow = "hidden";
         };
 
         const closeSidebar = () => {
             dashboardSidebar.classList.remove("active");
             sidebarOverlay.classList.remove("active");
+            document.body.style.overflow = "";
         };
 
-        mobileMenuBtn.addEventListener("click", openSidebar);
-        closeSidebarBtn.addEventListener("click", closeSidebar);
+        if (mobileMenuBtn) mobileMenuBtn.addEventListener("click", openSidebar);
+        if (bottomNavMenuBtn) {
+            bottomNavMenuBtn.addEventListener("click", () => {
+                if (dashboardSidebar.classList.contains("active")) {
+                    closeSidebar();
+                } else {
+                    openSidebar();
+                }
+            });
+        }
+        if (closeSidebarBtn) closeSidebarBtn.addEventListener("click", closeSidebar);
         sidebarOverlay.addEventListener("click", closeSidebar);
 
         const navLinks = document.querySelectorAll(".nav-item a");
@@ -471,6 +483,9 @@ function setupResponsiveMenuAndThemes() {
         
         if (mobileIcon) mobileIcon.innerText = iconName;
         if (desktopIcon) desktopIcon.innerText = iconName;
+
+        const metaTheme = document.getElementById("themeColorMeta");
+        if (metaTheme) metaTheme.setAttribute("content", isDark ? "#20222a" : "#F4F6F9");
     }
 
     updateThemeIcons();

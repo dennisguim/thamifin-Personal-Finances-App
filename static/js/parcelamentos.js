@@ -255,23 +255,35 @@ document.addEventListener("categoriesUpdated", (e) => {
 
 function setupResponsiveMenuAndThemes() {
     const mobileMenuBtn = document.getElementById("mobileMenuBtn");
+    const bottomNavMenuBtn = document.getElementById("bottomNavMenuBtn");
     const closeSidebarBtn = document.getElementById("closeSidebarBtn");
     const sidebarOverlay = document.getElementById("sidebarOverlay");
     const dashboardSidebar = document.getElementById("dashboardSidebar");
 
-    if (mobileMenuBtn && closeSidebarBtn && sidebarOverlay && dashboardSidebar) {
+    if (dashboardSidebar && sidebarOverlay) {
         const openSidebar = () => {
             dashboardSidebar.classList.add("active");
             sidebarOverlay.classList.add("active");
+            document.body.style.overflow = "hidden";
         };
 
         const closeSidebar = () => {
             dashboardSidebar.classList.remove("active");
             sidebarOverlay.classList.remove("active");
+            document.body.style.overflow = "";
         };
 
-        mobileMenuBtn.addEventListener("click", openSidebar);
-        closeSidebarBtn.addEventListener("click", closeSidebar);
+        if (mobileMenuBtn) mobileMenuBtn.addEventListener("click", openSidebar);
+        if (bottomNavMenuBtn) {
+            bottomNavMenuBtn.addEventListener("click", () => {
+                if (dashboardSidebar.classList.contains("active")) {
+                    closeSidebar();
+                } else {
+                    openSidebar();
+                }
+            });
+        }
+        if (closeSidebarBtn) closeSidebarBtn.addEventListener("click", closeSidebar);
         sidebarOverlay.addEventListener("click", closeSidebar);
 
         const navLinks = document.querySelectorAll(".nav-item a");
@@ -292,6 +304,9 @@ function setupResponsiveMenuAndThemes() {
         
         if (mobileIcon) mobileIcon.innerText = iconName;
         if (desktopIcon) desktopIcon.innerText = iconName;
+
+        const metaTheme = document.getElementById("themeColorMeta");
+        if (metaTheme) metaTheme.setAttribute("content", isDark ? "#20222a" : "#F4F6F9");
     }
 
     updateThemeIcons();

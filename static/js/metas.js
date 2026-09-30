@@ -97,12 +97,12 @@ function renderIncomesList() {
         const formattedDate = dateObj.toLocaleDateString("pt-BR", { month: "short", year: "2-digit" });
 
         row.innerHTML = `
-            <td style="font-weight: 600;">${inc.description}</td>
-            <td><span class="badge-pix" style="background: var(--md-sys-color-primary-container); color: var(--md-sys-color-on-primary-container); padding: 2px 8px; font-size: 11px;">${typeText}</span></td>
-            <td>Dia ${inc.receive_day} (${formattedDate})</td>
-            <td style="font-weight: 600; color: var(--md-sys-color-income);">${formatCurrency(inc.amount)}</td>
-            <td style="text-align: right;">
-                <button onclick="deleteIncome(${inc.id}, '${inc.description}')" style="background: none; border: none; color: var(--md-sys-color-error); cursor: pointer; display: inline-flex; align-items: center; justify-content: center; padding: 4px;">
+            <td class="col-desc" style="font-weight: 600;">${inc.description}</td>
+            <td class="col-type"><span class="badge-pix" style="background: var(--md-sys-color-primary-container); color: var(--md-sys-color-on-primary-container); padding: 2px 8px; font-size: 11px;">${typeText}</span></td>
+            <td class="col-date">Dia ${inc.receive_day} (${formattedDate})</td>
+            <td class="col-amount" style="font-weight: 600; color: var(--md-sys-color-income);">${formatCurrency(inc.amount)}</td>
+            <td class="col-actions" style="text-align: right;">
+                <button onclick="deleteIncome(${inc.id}, '${inc.description}')" style="background: none; border: none; color: var(--md-sys-color-error); cursor: pointer; display: inline-flex; align-items: center; justify-content: center; padding: 6px; border-radius: 50%;">
                     <span class="material-symbols-outlined" style="font-size: 18px;">delete</span>
                 </button>
             </td>
@@ -509,24 +509,41 @@ function setupProjectionEvents() {
 
 function setupResponsiveMenuAndThemes() {
     const mobileMenuBtn = document.getElementById("mobileMenuBtn");
+    const bottomNavMenuBtn = document.getElementById("bottomNavMenuBtn");
     const closeSidebarBtn = document.getElementById("closeSidebarBtn");
     const sidebarOverlay = document.getElementById("sidebarOverlay");
     const dashboardSidebar = document.getElementById("dashboardSidebar");
 
-    if (mobileMenuBtn && closeSidebarBtn && sidebarOverlay && dashboardSidebar) {
+    if (dashboardSidebar && sidebarOverlay) {
         const openSidebar = () => {
             dashboardSidebar.classList.add("active");
             sidebarOverlay.classList.add("active");
+            document.body.style.overflow = "hidden";
         };
 
         const closeSidebar = () => {
             dashboardSidebar.classList.remove("active");
             sidebarOverlay.classList.remove("active");
+            document.body.style.overflow = "";
         };
 
-        mobileMenuBtn.addEventListener("click", openSidebar);
-        closeSidebarBtn.addEventListener("click", closeSidebar);
+        if (mobileMenuBtn) mobileMenuBtn.addEventListener("click", openSidebar);
+        if (bottomNavMenuBtn) {
+            bottomNavMenuBtn.addEventListener("click", () => {
+                if (dashboardSidebar.classList.contains("active")) {
+                    closeSidebar();
+                } else {
+                    openSidebar();
+                }
+            });
+        }
+        if (closeSidebarBtn) closeSidebarBtn.addEventListener("click", closeSidebar);
         sidebarOverlay.addEventListener("click", closeSidebar);
+
+        const navLinks = document.querySelectorAll(".nav-item a");
+        navLinks.forEach(link => {
+            link.addEventListener("click", closeSidebar);
+        });
     }
 
     const mobileThemeToggle = document.getElementById("mobileThemeToggleBtn");
@@ -541,6 +558,9 @@ function setupResponsiveMenuAndThemes() {
         
         if (mobileIcon) mobileIcon.innerText = iconName;
         if (desktopIcon) desktopIcon.innerText = iconName;
+
+        const metaTheme = document.getElementById("themeColorMeta");
+        if (metaTheme) metaTheme.setAttribute("content", isDark ? "#20222a" : "#F4F6F9");
     }
 
     updateThemeIcons();

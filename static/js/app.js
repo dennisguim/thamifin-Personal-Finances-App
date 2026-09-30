@@ -68,7 +68,7 @@ function renderAccountsCards(accounts) {
             <!-- Zona de Upload de Extrato OFX -->
             <div class="drag-drop-area" id="dropzone-${acc.id}">
                 <span class="material-symbols-outlined" style="font-size: 32px; color: var(--md-sys-color-primary);">upload_file</span>
-                <div>Arraste seu extrato <b>OFX/XML</b> aqui</div>
+                <div><b>Toque para importar</b> ou arraste extrato OFX</div>
                 <input type="file" id="fileInput-${acc.id}" style="display: none;" accept=".ofx,.xml">
             </div>
         `;
@@ -219,16 +219,16 @@ function renderTransactions(accounts) {
         }
         
         row.innerHTML = `
-            <td style="color: var(--md-sys-color-secondary); font-weight: 500;">${tx.date}</td>
-            <td style="font-weight: 600;">${tx.bankName}</td>
-            <td>
+            <td class="col-date" style="color: var(--md-sys-color-secondary); font-weight: 500;">${tx.date}</td>
+            <td class="col-bank" style="font-weight: 600;">${tx.bankName}</td>
+            <td class="col-desc">
                 <div style="display: flex; align-items: center; justify-content: space-between; gap: 8px; width: 100%;">
                     <span>${typeBadge}${tx.description}</span>
                     ${installmentBadge}
                 </div>
             </td>
-            <td>${selectHtml}</td>
-            <td class="tx-amount ${amountClass}">${amountPrefix}${formatCurrency(tx.amount)}</td>
+            <td class="col-category">${selectHtml}</td>
+            <td class="col-amount tx-amount ${amountClass}">${amountPrefix}${formatCurrency(tx.amount)}</td>
         `;
         
         listContainer.appendChild(row);
@@ -402,25 +402,37 @@ function generateCharts(accounts) {
 
 // Configura o drawer mobile deslizante e os seletores de tema síncronos
 function setupResponsiveMenuAndThemes() {
-    // 1. Controle do Drawer Responsivo (Mobile)
+    // 1. Controle do Drawer Responsivo (Mobile Header & Bottom Nav)
     const mobileMenuBtn = document.getElementById("mobileMenuBtn");
+    const bottomNavMenuBtn = document.getElementById("bottomNavMenuBtn");
     const closeSidebarBtn = document.getElementById("closeSidebarBtn");
     const sidebarOverlay = document.getElementById("sidebarOverlay");
     const dashboardSidebar = document.getElementById("dashboardSidebar");
 
-    if (mobileMenuBtn && closeSidebarBtn && sidebarOverlay && dashboardSidebar) {
+    if (dashboardSidebar && sidebarOverlay) {
         const openSidebar = () => {
             dashboardSidebar.classList.add("active");
             sidebarOverlay.classList.add("active");
+            document.body.style.overflow = "hidden";
         };
 
         const closeSidebar = () => {
             dashboardSidebar.classList.remove("active");
             sidebarOverlay.classList.remove("active");
+            document.body.style.overflow = "";
         };
 
-        mobileMenuBtn.addEventListener("click", openSidebar);
-        closeSidebarBtn.addEventListener("click", closeSidebar);
+        if (mobileMenuBtn) mobileMenuBtn.addEventListener("click", openSidebar);
+        if (bottomNavMenuBtn) {
+            bottomNavMenuBtn.addEventListener("click", () => {
+                if (dashboardSidebar.classList.contains("active")) {
+                    closeSidebar();
+                } else {
+                    openSidebar();
+                }
+            });
+        }
+        if (closeSidebarBtn) closeSidebarBtn.addEventListener("click", closeSidebar);
         sidebarOverlay.addEventListener("click", closeSidebar);
 
         // Fecha drawer se algum item for clicado
@@ -443,6 +455,9 @@ function setupResponsiveMenuAndThemes() {
         
         if (mobileIcon) mobileIcon.innerText = iconName;
         if (desktopIcon) desktopIcon.innerText = iconName;
+
+        const metaTheme = document.getElementById("themeColorMeta");
+        if (metaTheme) metaTheme.setAttribute("content", isDark ? "#20222a" : "#F4F6F9");
     }
 
     // Inicializa ícones com o estado do tema

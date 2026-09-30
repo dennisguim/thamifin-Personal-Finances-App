@@ -2,7 +2,11 @@
 <html lang="pt-br">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="theme-color" content="#F4F6F9" id="themeColorMeta">
     <title>Receitas - ThamiFin</title>
     <!-- Google Fonts & Material Symbols -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0" rel="stylesheet">
@@ -13,9 +17,12 @@
         // Inicializa o tema imediatamente para evitar flashes de cor
         const savedTheme = localStorage.getItem("theme");
         const systemPrefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
-        if (savedTheme === "dark" || (!savedTheme && systemPrefersDark)) {
+        const isDark = savedTheme === "dark" || (!savedTheme && systemPrefersDark);
+        if (isDark) {
             document.body.classList.add("dark-mode");
         }
+        const metaTheme = document.getElementById("themeColorMeta");
+        if (metaTheme) metaTheme.setAttribute("content", isDark ? "#20222a" : "#F4F6F9");
     </script>
 
     <!-- OVERLAY DE BACKDROP DA SIDEBAR MOBILE -->
@@ -389,6 +396,30 @@
             </div>
         </div>
     </div>
+
+    <!-- BARRA DE NAVEGAÇÃO INFERIOR MOBILE (M3 BOTTOM BAR) -->
+    <nav class="mobile-bottom-nav" id="mobileBottomNav">
+        <a href="/dashboard" class="bottom-nav-item {% if active_page == 'dashboard' %}active{% endif %}" title="Visão Geral">
+            <span class="nav-icon-pill"><span class="material-symbols-outlined">dashboard</span></span>
+            <span class="nav-label">Início</span>
+        </a>
+        <a href="/receitas" class="bottom-nav-item {% if active_page == 'receitas' %}active{% endif %}" title="Receitas">
+            <span class="nav-icon-pill"><span class="material-symbols-outlined">trending_up</span></span>
+            <span class="nav-label">Receitas</span>
+        </a>
+        <a href="/custos" class="bottom-nav-item {% if active_page == 'custos' %}active{% endif %}" title="Custos">
+            <span class="nav-icon-pill"><span class="material-symbols-outlined">payments</span></span>
+            <span class="nav-label">Custos</span>
+        </a>
+        <a href="/parcelamentos" class="bottom-nav-item {% if active_page == 'parcelamentos' %}active{% endif %}" title="Parcelamentos">
+            <span class="nav-icon-pill"><span class="material-symbols-outlined">credit_card</span></span>
+            <span class="nav-label">Parcelas</span>
+        </a>
+        <button type="button" class="bottom-nav-item {% if active_page in ['graficos', 'metas'] %}active{% endif %}" id="bottomNavMenuBtn" title="Mais opções">
+            <span class="nav-icon-pill"><span class="material-symbols-outlined">menu</span></span>
+            <span class="nav-label">Mais</span>
+        </button>
+    </nav>
 
     <!-- SCRIPTS JS -->
     <script src="/static/js/receitas.js"></script>
