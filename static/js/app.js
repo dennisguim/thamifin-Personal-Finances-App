@@ -2,6 +2,30 @@
 let categoryChartInstance = null;
 let evolutionChartInstance = null;
 
+// Helpers de Contraste e Identidade Visual Bancária
+function isColorLight(hexColor) {
+    if (!hexColor || typeof hexColor !== "string") return false;
+    let hex = hexColor.trim().replace("#", "");
+    if (hex.length === 3) {
+        hex = hex[0] + hex[0] + hex[1] + hex[1] + hex[2] + hex[2];
+    }
+    if (hex.length !== 6) return false;
+    const r = parseInt(hex.substring(0, 2), 16) || 0;
+    const g = parseInt(hex.substring(2, 4), 16) || 0;
+    const b = parseInt(hex.substring(4, 6), 16) || 0;
+    const luminance = (0.299 * r + 0.587 * g + 0.114 * b);
+    return luminance > 165;
+}
+
+function getBankBadgeHtml(bankName, bankColor) {
+    const color = bankColor || "#48b9c7";
+    const isLight = isColorLight(color);
+    const textColor = isLight ? "#111827" : "#ffffff";
+    const textShadow = isLight ? "none" : "0 1px 2px rgba(0, 0, 0, 0.35)";
+    const border = isLight ? "1px solid rgba(0, 0, 0, 0.18)" : "1px solid rgba(255, 255, 255, 0.22)";
+    return `<span class="badge-bank" style="background-color: ${color}; color: ${textColor}; text-shadow: ${textShadow}; border: ${border};" title="Conta: ${bankName}">${bankName}</span>`;
+}
+
 // Categorias disponíveis para seleção manual (inicialmente padrão, atualizadas dinamicamente)
 let CATEGORIES = ["Transporte", "Lazer", "Serviços & Assinaturas", "Saúde", "Receita", "Transferência entre Contas", "Outros", "Loteria", "Mercado", "Restaurante & Delivery", "Pagamento de Fatura", "Moradia & Contas"];
 
@@ -92,7 +116,8 @@ function renderAccountsCards(accounts) {
         
         // Aplica a cor de destaque customizada do banco
         const accentColor = acc.color || "#48b9c7";
-        card.style.borderLeft = `5px solid ${accentColor}`;
+        card.style.setProperty("border-left", `6px solid ${accentColor}`, "important");
+        card.style.boxShadow = `-4px 0 20px ${accentColor}44, var(--glass-shadow)`;
         
         card.innerHTML = `
             <div class="card-header-bank">
@@ -101,11 +126,11 @@ function renderAccountsCards(accounts) {
                     <h3 style="margin: 0; font-size: 16px;">${acc.bank_name}</h3>
                 </div>
                 <div style="display: flex; align-items: center; gap: 6px;">
-                    <!-- Seletor de Accent Color (Cross-browser Firefox + Chromium) -->
-                    <input type="color" id="dashBankColor_${acc.id}" value="${accentColor}" onchange="changeBankColor(${acc.id}, this.value)" style="position: absolute; left: -9999px; width: 1px; height: 1px; opacity: 0; pointer-events: none;">
-                    <button type="button" onclick="document.getElementById('dashBankColor_${acc.id}').click()" title="Alterar cor de destaque do banco" style="background: var(--glass-input-bg); border: 1px solid var(--md-sys-color-outline-variant); cursor: pointer; display: flex; align-items: center; justify-content: center; width: 28px; height: 28px; border-radius: 50%; transition: transform 0.2s ease;">
+                    <!-- Seletor de Accent Color Nativo Cross-browser -->
+                    <label title="Alterar cor de destaque do banco" style="background: var(--glass-input-bg); border: 1px solid var(--md-sys-color-outline-variant); cursor: pointer; display: flex; align-items: center; justify-content: center; width: 28px; height: 28px; border-radius: 50%; position: relative; overflow: hidden; transition: transform 0.2s ease;">
                         <span class="material-symbols-outlined" style="font-size: 16px; color: ${accentColor};">palette</span>
-                    </button>
+                        <input type="color" value="${accentColor}" onchange="changeBankColor(${acc.id}, this.value)" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; opacity: 0; cursor: pointer; border: none; padding: 0; margin: 0;">
+                    </label>
                     <button type="button" onclick="deleteBankAccount(${acc.id}, '${acc.bank_name}')" style="background: none; border: none; cursor: pointer; color: var(--md-sys-color-outline); padding: 4px; border-radius: 50%; display: flex; align-items: center; transition: color 0.2s;" title="Excluir conta ${acc.bank_name}">
                         <span class="material-symbols-outlined" style="font-size: 19px;">delete</span>
                     </button>
@@ -353,7 +378,7 @@ function renderTransactions(accounts) {
             }
         }
         
-        const bankBadgeHtml = `<span class="badge-bank" style="background-color: ${tx.bankColor || '#48b9c7'}; color: #ffffff;">${tx.bankName}</span>`;
+        const bankBadgeHtml = getBankBadgeHtml(tx.bankName, tx.bankColor);
         
         row.innerHTML = `
             <td class="col-date" style="color: var(--md-sys-color-secondary); font-weight: 500;">${tx.date}</td>

@@ -10,7 +10,7 @@
     <title>Painel Administrativo - ThamiFin</title>
     <!-- Google Fonts & Material Symbols -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0" rel="stylesheet">
-    <link rel="stylesheet" href="/static/css/style.css">
+    <link rel="stylesheet" href="/static/css/style.css?v=3.1">
 </head>
 <body>
     <script>
@@ -238,7 +238,7 @@
                                 <td>
                                     <div style="display: flex; flex-wrap: wrap; gap: 6px; align-items: center;">
                                         {% for acc in ws.accounts %}
-                                            <span class="badge-bank" style="background-color: {{ acc.color or '#48b9c7' }}; color: #ffffff;" title="R$ {{ '%.2f'|format(acc.balance) }}">
+                                            <span class="badge-bank" style="background-color: {{ acc.color or '#48b9c7' }}; color: {{ (acc.color or '#48b9c7')|contrast_color }}; border: {{ '1px solid rgba(0,0,0,0.18)' if (acc.color or '#48b9c7')|is_light_color else '1px solid rgba(255,255,255,0.25)' }};" title="R$ {{ '%.2f'|format(acc.balance) }}">
                                                 {{ acc.bank_name }}
                                             </span>
                                         {% else %}

@@ -10,7 +10,7 @@
     <title>Meu Perfil - ThamiFin</title>
     <!-- Google Fonts & Material Symbols -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0" rel="stylesheet">
-    <link rel="stylesheet" href="/static/css/style.css">
+    <link rel="stylesheet" href="/static/css/style.css?v=3.1">
 </head>
 <body>
     <script>
@@ -228,14 +228,27 @@
                             
                             <div style="display: flex; flex-direction: column; gap: 10px;">
                                 {% for acc in workspace_accounts %}
-                                <div style="display: flex; align-items: center; justify-content: space-between; padding: 12px 16px; border-radius: var(--radius-md); background: var(--glass-input-bg); border: 1px solid var(--md-sys-color-outline-variant); border-left: 6px solid {{ acc.color or '#48b9c7' }}; gap: 14px;">
+                                <div id="profileAccountCard_{{ acc.id }}" style="display: flex; align-items: center; justify-content: space-between; padding: 12px 16px; border-radius: var(--radius-md); background: var(--glass-input-bg); border: 1px solid var(--md-sys-color-outline-variant); border-left: 6px solid {{ acc.color or '#48b9c7' }}; gap: 14px; transition: border-left-color 0.2s ease;">
                                     <div style="display: flex; align-items: center; gap: 12px; min-width: 0;">
-                                        <!-- Círculo de Amostra preenchido com a cor de destaque do banco -->
-                                        <span onclick="document.getElementById('profileBankColor_{{ acc.id }}').click()" title="Cor de destaque do {{ acc.bank_name }} (clique para alterar)" style="cursor: pointer; display: block; width: 22px; height: 22px; min-width: 22px; min-height: 22px; border-radius: 50%; background-color: {{ acc.color or '#48b9c7' }}; border: 3px solid #ffffff; box-shadow: 0 0 0 1.5px rgba(0,0,0,0.18), 0 2px 6px rgba(0,0,0,0.25); flex-shrink: 0;"></span>
+                                        <!-- Círculo de Amostra Interativo com Seletor Nativo Cross-browser -->
+                                        <label id="profileBankSwatchWrap_{{ acc.id }}" title="Clique para alterar a cor de destaque do {{ acc.bank_name }}" style="cursor: pointer; position: relative; display: block; width: 26px; height: 26px; min-width: 26px; min-height: 26px; border-radius: 50%; overflow: hidden; border: 3px solid #ffffff; box-shadow: 0 0 0 1.5px rgba(0,0,0,0.18), 0 2px 6px rgba(0,0,0,0.25); flex-shrink: 0; background-color: {{ acc.color or '#48b9c7' }};">
+                                            <input type="color" 
+                                                   id="profileBankColor_{{ acc.id }}" 
+                                                   value="{{ acc.color or '#48b9c7' }}" 
+                                                   onchange="changeProfileBankColor({{ acc.id }}, this.value)" 
+                                                   oninput="previewProfileBankColor({{ acc.id }}, this.value)" 
+                                                   style="position: absolute; top: -50%; left: -50%; width: 200%; height: 200%; opacity: 0; cursor: pointer; border: none; padding: 0; margin: 0;">
+                                        </label>
                                         
                                         <div style="min-width: 0;">
-                                            <div style="font-size: 15px; font-weight: 700; color: var(--md-sys-color-on-surface); line-height: 1.2;">
-                                                {{ acc.bank_name }}
+                                            <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
+                                                <span style="font-size: 15px; font-weight: 700; color: var(--md-sys-color-on-surface); line-height: 1.2;">
+                                                    {{ acc.bank_name }}
+                                                </span>
+                                                <!-- Pílula Oficial com Contraste Automático -->
+                                                <span id="profileBankPill_{{ acc.id }}" class="badge-bank" style="background-color: {{ acc.color or '#48b9c7' }}; color: {{ (acc.color or '#48b9c7')|contrast_color }}; border: {{ '1px solid rgba(0,0,0,0.18)' if (acc.color or '#48b9c7')|is_light_color else '1px solid rgba(255,255,255,0.25)' }};">
+                                                    {{ acc.bank_name }}
+                                                </span>
                                             </div>
                                             <div style="font-size: 13px; font-weight: 600; color: var(--md-sys-color-primary); margin-top: 3px;">
                                                 R$ {{ '%.2f'|format(acc.balance) }}
@@ -244,14 +257,16 @@
                                     </div>
 
                                     <div style="display: flex; align-items: center; gap: 8px; flex-shrink: 0;">
-                                        <!-- Input nativo cross-browser (Firefox e Chrome/Chromium) -->
-                                        <input type="color" id="profileBankColor_{{ acc.id }}" value="{{ acc.color or '#48b9c7' }}" onchange="changeProfileBankColor({{ acc.id }}, this.value)" style="position: absolute; left: -9999px; width: 1px; height: 1px; opacity: 0; pointer-events: none;">
-                                        
-                                        <!-- Botão Alterar Cor -->
-                                        <button type="button" onclick="document.getElementById('profileBankColor_{{ acc.id }}').click()" class="m3-btn m3-btn-secondary" style="width: auto; padding: 6px 12px; min-height: 30px; font-size: 12px; border-radius: var(--radius-sm); display: inline-flex; align-items: center; gap: 5px; cursor: pointer;" title="Alterar cor de destaque do banco">
-                                            <span class="material-symbols-outlined" style="font-size: 16px; color: {{ acc.color or '#48b9c7' }};">palette</span>
+                                        <!-- Botão Alterar Cor (Nativo com clique direto) -->
+                                        <label class="m3-btn m3-btn-secondary" style="position: relative; overflow: hidden; cursor: pointer; width: auto; padding: 6px 12px; min-height: 30px; font-size: 12px; border-radius: var(--radius-sm); display: inline-flex; align-items: center; gap: 5px;" title="Alterar cor de destaque do {{ acc.bank_name }}">
+                                            <span class="material-symbols-outlined" id="paletteIcon_{{ acc.id }}" style="font-size: 16px; color: {{ acc.color or '#48b9c7' }};">palette</span>
                                             <span>Alterar Cor</span>
-                                        </button>
+                                            <input type="color" 
+                                                   value="{{ acc.color or '#48b9c7' }}" 
+                                                   onchange="changeProfileBankColor({{ acc.id }}, this.value)" 
+                                                   oninput="previewProfileBankColor({{ acc.id }}, this.value)" 
+                                                   style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; opacity: 0; cursor: pointer; border: none; padding: 0; margin: 0;">
+                                        </label>
                                         
                                         <!-- Botão Excluir Banco -->
                                         <button type="button" onclick="deleteAccountFromProfile({{ acc.id }}, '{{ acc.bank_name }}')" class="m3-btn" style="width: auto; padding: 6px 9px; min-height: 30px; font-size: 12px; border-radius: var(--radius-sm); background: rgba(229, 57, 53, 0.1); color: var(--md-sys-color-error); border: 1px solid rgba(229, 57, 53, 0.25); display: inline-flex; align-items: center;" title="Excluir conta {{ acc.bank_name }}">
@@ -561,7 +576,42 @@
             }
         }
 
+        function isColorLight(hexColor) {
+            if (!hexColor || typeof hexColor !== "string") return false;
+            let hex = hexColor.trim().replace("#", "");
+            if (hex.length === 3) {
+                hex = hex[0] + hex[0] + hex[1] + hex[1] + hex[2] + hex[2];
+            }
+            if (hex.length !== 6) return false;
+            const r = parseInt(hex.substring(0, 2), 16) || 0;
+            const g = parseInt(hex.substring(2, 4), 16) || 0;
+            const b = parseInt(hex.substring(4, 6), 16) || 0;
+            return ((0.299 * r + 0.587 * g + 0.114 * b) > 165);
+        }
+
+        function previewProfileBankColor(accountId, color) {
+            if (!color) return;
+            const card = document.getElementById(`profileAccountCard_${accountId}`);
+            if (card) card.style.borderLeft = `6px solid ${color}`;
+            
+            const swatch = document.getElementById(`profileBankSwatchWrap_${accountId}`);
+            if (swatch) swatch.style.backgroundColor = color;
+            
+            const icon = document.getElementById(`paletteIcon_${accountId}`);
+            if (icon) icon.style.color = color;
+            
+            const pill = document.getElementById(`profileBankPill_${accountId}`);
+            if (pill) {
+                const isLight = isColorLight(color);
+                pill.style.backgroundColor = color;
+                pill.style.color = isLight ? "#111827" : "#ffffff";
+                pill.style.border = isLight ? "1px solid rgba(0,0,0,0.18)" : "1px solid rgba(255,255,255,0.25)";
+                pill.style.textShadow = isLight ? "none" : "0 1px 2px rgba(0,0,0,0.35)";
+            }
+        }
+
         async function changeProfileBankColor(accountId, newColor) {
+            previewProfileBankColor(accountId, newColor);
             const formData = new FormData();
             formData.append("color", newColor);
             try {

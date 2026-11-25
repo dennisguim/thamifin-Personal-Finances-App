@@ -2,6 +2,30 @@
 let allAccounts = [];
 let CATEGORIES = ["Transporte", "Lazer", "Serviços & Assinaturas", "Saúde", "Receita", "Transferência entre Contas", "Outros", "Loteria", "Mercado", "Restaurante & Delivery", "Pagamento de Fatura", "Moradia & Contas"];
 
+// Helpers de Contraste e Identidade Visual Bancária
+function isColorLight(hexColor) {
+    if (!hexColor || typeof hexColor !== "string") return false;
+    let hex = hexColor.trim().replace("#", "");
+    if (hex.length === 3) {
+        hex = hex[0] + hex[0] + hex[1] + hex[1] + hex[2] + hex[2];
+    }
+    if (hex.length !== 6) return false;
+    const r = parseInt(hex.substring(0, 2), 16) || 0;
+    const g = parseInt(hex.substring(2, 4), 16) || 0;
+    const b = parseInt(hex.substring(4, 6), 16) || 0;
+    const luminance = (0.299 * r + 0.587 * g + 0.114 * b);
+    return luminance > 165;
+}
+
+function getBankBadgeHtml(bankName, bankColor) {
+    const color = bankColor || "#48b9c7";
+    const isLight = isColorLight(color);
+    const textColor = isLight ? "#111827" : "#ffffff";
+    const textShadow = isLight ? "none" : "0 1px 2px rgba(0, 0, 0, 0.35)";
+    const border = isLight ? "1px solid rgba(0, 0, 0, 0.18)" : "1px solid rgba(255, 255, 255, 0.22)";
+    return `<span class="badge-bank" style="background-color: ${color}; color: ${textColor}; text-shadow: ${textShadow}; border: ${border};" title="Conta: ${bankName}">${bankName}</span>`;
+}
+
 document.addEventListener("DOMContentLoaded", () => {
     // Carrega dados iniciais do Dashboard
     loadCostsData();
@@ -342,9 +366,8 @@ function renderCostsTable(costs) {
         const row = document.createElement("tr");
         row.className = "tx-row";
         
-        // Badge do banco
-        const bankColor = tx.bankColor || "#48b9c7";
-        const bankBadgeHtml = `<span class="badge-bank" style="background-color: ${bankColor}; color: #ffffff;">${tx.bankName}</span>`;
+        // Badge do banco com alinhamento e contraste automático
+        const bankBadgeHtml = getBankBadgeHtml(tx.bankName, tx.bankColor);
         
         // Badge de PIX
         let typeBadge = "";

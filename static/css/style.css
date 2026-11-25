@@ -1033,24 +1033,35 @@ body.dark-mode {
     color: var(--md-sys-color-on-surface);
 }
 
-/* Badges de Contas/Bancos */
+/* Badges de Contas/Bancos (Pílulas com Alinhamento e Centralização Perfeitos) */
 .badge-bank {
-    font-size: 11.5px;
+    font-size: 11px;
     font-weight: 700;
-    padding: 3px 10px;
+    padding: 3px 12px;
+    min-height: 23px;
     border-radius: var(--radius-full);
     display: inline-flex;
     align-items: center;
-    color: #ffffff;
-    letter-spacing: 0.02em;
-    background: var(--md-sys-color-primary);
-    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+    justify-content: center;
+    text-align: center;
+    line-height: 1;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    white-space: nowrap;
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.14);
+    box-sizing: border-box;
+    vertical-align: middle;
+    transition: transform 0.15s ease, box-shadow 0.15s ease;
 }
 
-.badge-bank-nubank { background: linear-gradient(135deg, #820ad1 0%, #6805a8 100%); }
-.badge-bank-inter { background: linear-gradient(135deg, #ff7a00 0%, #e06900 100%); }
-.badge-bank-caixa { background: linear-gradient(135deg, #005ca9 0%, #004682 100%); }
-.badge-bank-default { background: var(--md-sys-color-outline); }
+.badge-bank:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.22);
+}
+
+.bank-render-card {
+    transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.25s ease, border-color 0.25s ease;
+}
 
 /* Card de Controle de Formato de Gráfico */
 .chart-header-controls {

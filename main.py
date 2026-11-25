@@ -108,6 +108,27 @@ BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 app.mount("/static", StaticFiles(directory=os.path.join(BASE_DIR, "static")), name="static")
 templates = Jinja2Templates(directory=os.path.join(BASE_DIR, "templates"))
 
+# Filtros Jinja2 para Contraste e Identidade Visual Bancária
+def is_color_light(hex_color: str) -> bool:
+    if not hex_color or not isinstance(hex_color, str):
+        return False
+    hex_clean = hex_color.strip().lstrip("#")
+    if len(hex_clean) == 3:
+        hex_clean = "".join(c * 2 for c in hex_clean)
+    if len(hex_clean) != 6:
+        return False
+    try:
+        r = int(hex_clean[0:2], 16)
+        g = int(hex_clean[2:4], 16)
+        b = int(hex_clean[4:6], 16)
+        luminance = (0.299 * r + 0.587 * g + 0.114 * b)
+        return luminance > 165
+    except ValueError:
+        return False
+
+templates.env.filters["is_light_color"] = is_color_light
+templates.env.filters["contrast_color"] = lambda color: "#111827" if is_color_light(color) else "#ffffff"
+
 # --- ROTAS DE REDIRECIONAMENTO ---
 
 @app.get("/", response_class=HTMLResponse)
