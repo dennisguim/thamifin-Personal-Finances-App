@@ -101,11 +101,11 @@ function renderAccountsCards(accounts) {
                     <h3 style="margin: 0; font-size: 16px;">${acc.bank_name}</h3>
                 </div>
                 <div style="display: flex; align-items: center; gap: 6px;">
-                    <!-- Seletor de Accent Color -->
-                    <label title="Alterar cor de destaque do banco" style="cursor: pointer; display: flex; align-items: center; justify-content: center; position: relative; width: 26px; height: 26px; border-radius: 50%; background: var(--glass-input-bg); border: 1px solid var(--md-sys-color-outline-variant);">
+                    <!-- Seletor de Accent Color (Cross-browser Firefox + Chromium) -->
+                    <input type="color" id="dashBankColor_${acc.id}" value="${accentColor}" onchange="changeBankColor(${acc.id}, this.value)" style="position: absolute; left: -9999px; width: 1px; height: 1px; opacity: 0; pointer-events: none;">
+                    <button type="button" onclick="document.getElementById('dashBankColor_${acc.id}').click()" title="Alterar cor de destaque do banco" style="background: var(--glass-input-bg); border: 1px solid var(--md-sys-color-outline-variant); cursor: pointer; display: flex; align-items: center; justify-content: center; width: 28px; height: 28px; border-radius: 50%; transition: transform 0.2s ease;">
                         <span class="material-symbols-outlined" style="font-size: 16px; color: ${accentColor};">palette</span>
-                        <input type="color" value="${accentColor}" onchange="changeBankColor(${acc.id}, this.value)" style="position: absolute; opacity: 0; width: 100%; height: 100%; cursor: pointer;">
-                    </label>
+                    </button>
                     <button type="button" onclick="deleteBankAccount(${acc.id}, '${acc.bank_name}')" style="background: none; border: none; cursor: pointer; color: var(--md-sys-color-outline); padding: 4px; border-radius: 50%; display: flex; align-items: center; transition: color 0.2s;" title="Excluir conta ${acc.bank_name}">
                         <span class="material-symbols-outlined" style="font-size: 19px;">delete</span>
                     </button>
