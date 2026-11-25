@@ -809,6 +809,29 @@ def admin_add_account_to_workspace(
 
 # --- APIS DE DADOS FINANCEIROS (ISOLAMENTO POR BANCO DE DADOS) ---
 
+def get_default_bank_color(bank_name: str) -> str:
+    name_lower = (bank_name or "").lower()
+    if "nubank" in name_lower:
+        return "#820ad1"
+    elif "inter" in name_lower:
+        return "#ff7a00"
+    elif "caixa" in name_lower:
+        return "#0066ae"
+    elif "itau" in name_lower or "itaú" in name_lower:
+        return "#ec7000"
+    elif "bradesco" in name_lower:
+        return "#cc092f"
+    elif "santander" in name_lower:
+        return "#ea1d25"
+    elif "mercado" in name_lower or "pago" in name_lower:
+        return "#009ee3"
+    elif "c6" in name_lower:
+        return "#242424"
+    elif "bb" in name_lower or "brasil" in name_lower:
+        return "#fcee00"
+    return "#48b9c7"
+
+
 @app.get("/api/data")
 def get_dashboard_data(
     db: Session = Depends(get_db), 
@@ -840,6 +863,7 @@ def get_dashboard_data(
             "bank_name": account.bank_name,
             "balance": recalculated_balance,
             "initial_balance": account.initial_balance or 0.0,
+            "color": account.color or get_default_bank_color(account.bank_name),
             "transactions": [
                 {
                     "id": t.id,
@@ -872,6 +896,7 @@ def get_dashboard_data(
 def create_bank_account(
     bank_name: str = Form(...),
     initial_balance: float = Form(0.0),
+    color: str = Form(None),
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user)
 ):
@@ -881,13 +906,17 @@ def create_bank_account(
         raise HTTPException(status_code=400, detail="O nome do banco não pode ser vazio.")
         
     workspace = get_user_workspace(current_user, db)
+    chosen_color = color.strip() if color and color.strip() else get_default_bank_color(name_clean)
+    if not chosen_color.startswith("#"):
+        chosen_color = f"#{chosen_color}"
     
     account = Account(
         workspace_id=workspace.id,
         user_id=current_user.id,
         bank_name=name_clean,
         initial_balance=initial_balance,
-        balance=initial_balance
+        balance=initial_balance,
+        color=chosen_color
     )
     db.add(account)
     db.commit()
@@ -898,8 +927,39 @@ def create_bank_account(
         "account": {
             "id": account.id,
             "bank_name": account.bank_name,
-            "balance": account.balance
+            "balance": account.balance,
+            "color": account.color
         }
+    }
+
+
+@app.post("/api/accounts/{account_id}/color")
+def update_account_color(
+    account_id: int,
+    color: str = Form(...),
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
+    """Atualiza a cor de destaque (accent color) de uma conta bancária."""
+    workspace = get_user_workspace(current_user, db)
+    account = db.query(Account).filter(
+        Account.id == account_id,
+        Account.workspace_id == workspace.id
+    ).first()
+    
+    if not account:
+        raise HTTPException(status_code=404, detail="Conta bancária não encontrada no seu Banco de Dados.")
+        
+    clean_color = color.strip()
+    if not clean_color.startswith("#"):
+        clean_color = f"#{clean_color}"
+    account.color = clean_color
+    db.add(account)
+    db.commit()
+    return {
+        "status": "success",
+        "message": f"Cor do banco '{account.bank_name}' atualizada com sucesso!",
+        "color": account.color
     }
 
 
@@ -1019,6 +1079,110 @@ def update_transaction_category(
     db.add(tx)
     db.commit()
     return {"status": "success", "message": "Categoria atualizada com sucesso"}
+
+
+@app.post("/api/transfers/detect-and-match")
+def detect_and_match_transfers(
+    apply: bool = True,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
+    """
+    Cruza saídas e entradas entre contas diferentes do mesmo espaço ativo
+    que possuem o mesmo valor e datas próximas (até 2 dias de diferença),
+    categorizando-as automaticamente como 'Transferência entre Contas'.
+    """
+    workspace = get_user_workspace(current_user, db)
+    accounts = db.query(Account).filter(Account.workspace_id == workspace.id).all()
+    account_ids = [a.id for a in accounts]
+    account_map = {a.id: a.bank_name for a in accounts}
+
+    if len(account_ids) < 2:
+        return {
+            "status": "success",
+            "matched_count": 0,
+            "newly_matched": 0,
+            "message": "É necessário ter pelo menos duas contas bancárias para cruzar transferências.",
+            "matches": []
+        }
+
+    txs = db.query(Transaction).filter(
+        Transaction.account_id.in_(account_ids)
+    ).order_by(Transaction.date.asc()).all()
+
+    outflows = [t for t in txs if t.amount < 0]
+    inflows = [t for t in txs if t.amount > 0]
+
+    matches = []
+    matched_inflow_ids = set()
+    matched_outflow_ids = set()
+    TRANSFER_CAT = "Transferência entre Contas"
+
+    for out_tx in outflows:
+        if out_tx.id in matched_outflow_ids:
+            continue
+        
+        target_amount = round(abs(out_tx.amount), 2)
+        best_match = None
+        best_diff_days = 999
+
+        for in_tx in inflows:
+            if in_tx.id in matched_inflow_ids:
+                continue
+            if out_tx.account_id == in_tx.account_id:
+                continue
+            
+            in_amount = round(in_tx.amount, 2)
+            if target_amount == in_amount:
+                diff_days = abs((out_tx.date.date() - in_tx.date.date()).days)
+                if diff_days <= 2 and diff_days < best_diff_days:
+                    best_match = in_tx
+                    best_diff_days = diff_days
+                    if diff_days == 0:
+                        break
+
+        if best_match:
+            matched_inflow_ids.add(best_match.id)
+            matched_outflow_ids.add(out_tx.id)
+
+            was_already_matched = (
+                out_tx.category == TRANSFER_CAT and best_match.category == TRANSFER_CAT
+            )
+
+            if apply and not was_already_matched:
+                out_tx.category = TRANSFER_CAT
+                best_match.category = TRANSFER_CAT
+                db.add(out_tx)
+                db.add(best_match)
+
+            matches.append({
+                "amount": target_amount,
+                "outflow_id": out_tx.id,
+                "outflow_bank": account_map.get(out_tx.account_id, "Banco"),
+                "outflow_desc": out_tx.description,
+                "outflow_date": out_tx.date.strftime("%d/%m/%Y"),
+                "inflow_id": best_match.id,
+                "inflow_bank": account_map.get(best_match.account_id, "Banco"),
+                "inflow_desc": best_match.description,
+                "inflow_date": best_match.date.strftime("%d/%m/%Y"),
+                "diff_days": best_diff_days,
+                "already_matched": was_already_matched
+            })
+
+    if apply and matches:
+        db.commit()
+
+    newly_matched = sum(1 for m in matches if not m["already_matched"])
+
+    return {
+        "status": "success",
+        "matched_count": len(matches),
+        "newly_matched": newly_matched,
+        "message": f"{newly_matched} nova(s) transferência(s) identificada(s) e categorizada(s) automaticamente." if newly_matched > 0 else (
+            f"Todas as {len(matches)} transferências identificadas já estavam categorizadas." if len(matches) > 0 else "Nenhuma transferência cruzada entre contas encontrada no período."
+        ),
+        "matches": matches
+    }
 
 
 @app.post("/api/transaction/{transaction_id}/cost_type")
@@ -1457,7 +1621,7 @@ def get_simulation_projection(
         Transaction.account_id.in_(account_ids),
         Transaction.amount < 0,
         Transaction.date >= ninety_days_ago,
-        Transaction.category != "Pagamento de Fatura"
+        Transaction.category.notin_(["Pagamento de Fatura", "Transferência entre Contas"])
     ).all() if account_ids else []
     
     total_past_90_days = sum(abs(t.amount) for t in txs_past_90_days)
@@ -1467,7 +1631,7 @@ def get_simulation_projection(
         all_expenses = db.query(Transaction).filter(
             Transaction.account_id.in_(account_ids),
             Transaction.amount < 0, 
-            Transaction.category != "Pagamento de Fatura"
+            Transaction.category.notin_(["Pagamento de Fatura", "Transferência entre Contas"])
         ).all()
         if all_expenses:
             first_tx = db.query(Transaction).filter(Transaction.account_id.in_(account_ids)).order_by(Transaction.date.asc()).first()

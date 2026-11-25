@@ -1,6 +1,6 @@
 // Estado global da página de custos
 let allAccounts = [];
-let CATEGORIES = ["Transporte", "Lazer", "Serviços & Assinaturas", "Saúde", "Receita", "Outros", "Loteria", "Mercado", "Restaurante & Delivery", "Pagamento de Fatura", "Moradia & Contas"];
+let CATEGORIES = ["Transporte", "Lazer", "Serviços & Assinaturas", "Saúde", "Receita", "Transferência entre Contas", "Outros", "Loteria", "Mercado", "Restaurante & Delivery", "Pagamento de Fatura", "Moradia & Contas"];
 
 document.addEventListener("DOMContentLoaded", () => {
     // Carrega dados iniciais do Dashboard

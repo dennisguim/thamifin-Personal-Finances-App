@@ -221,6 +221,15 @@
                         <option value="all">Todas as Categorias</option>
                     </select>
                 </div>
+
+                <div class="filter-group">
+                    <label for="transferFilter">Exibir Entradas:</label>
+                    <select id="transferFilter" class="filter-select">
+                        <option value="receitas_only">Apenas Receitas Reais</option>
+                        <option value="all">Todas as Entradas</option>
+                        <option value="transfers_only">Apenas Transferências entre Contas</option>
+                    </select>
+                </div>
             </section>
 
             <!-- GRADE COM CARDS KPIs DE RECEITAS -->
@@ -268,64 +277,76 @@
                 </div>
             </section>
 
-            <!-- SPLIT VIEW: REALIZADO VS ESTIMADO -->
-            <section style="display: grid; grid-template-columns: 1.8fr 1fr; gap: 24px; margin-bottom: 40px;" class="grid-layout-metas-split">
-                <!-- Seção Esquerda: Tabela de Receitas Realizadas -->
-                <div class="m3-card" style="padding: 24px;">
-                    <div class="card-header-bank" style="border-bottom: 1px solid var(--md-sys-color-outline-variant); padding-bottom: 12px; margin-bottom: 16px;">
-                        <h3 style="font-weight: 600; display: flex; align-items: center; gap: 8px; margin: 0; font-size: 16px;">
+            <!-- SEÇÃO 1: RECEITAS REALIZADAS (FULL WIDTH) -->
+            <section class="m3-card" style="padding: 24px; margin-bottom: 28px;">
+                <div class="card-header-bank" style="border-bottom: 1px solid var(--md-sys-color-outline-variant); padding-bottom: 12px; margin-bottom: 16px; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px;">
+                    <div>
+                        <h3 style="font-weight: 600; display: flex; align-items: center; gap: 8px; margin: 0; font-size: 17px;">
                             <span class="material-symbols-outlined" style="color: var(--md-sys-color-income);">payments</span>
                             Receitas Realizadas (Entradas de Extratos)
                         </h3>
+                        <p style="font-size: 13px; color: var(--md-sys-color-outline); margin: 4px 0 0 0;">
+                            Entradas e recebimentos reais identificados nos seus extratos bancários importados
+                        </p>
                     </div>
-                    
-                    <div class="tx-table-container">
-                        <table class="tx-table">
-                            <thead>
-                                <tr>
-                                    <th>Data</th>
-                                    <th>Conta</th>
-                                    <th>Descrição</th>
-                                    <th>Categoria</th>
-                                    <th style="text-align: right;">Valor</th>
-                                </tr>
-                            </thead>
-                            <tbody id="receitasRealizadasList">
-                                <!-- Carregado via JS -->
-                            </tbody>
-                        </table>
-                    </div>
+                    <button type="button" id="btnAutoMatchTransfers" onclick="autoMatchTransfers()" class="m3-btn m3-btn-secondary" style="width: auto; padding: 7px 16px; font-size: 12.5px; border-radius: var(--radius-sm); display: inline-flex; align-items: center; gap: 6px;">
+                        <span class="material-symbols-outlined" style="font-size: 17px; color: var(--md-sys-color-primary);">sync_alt</span>
+                        Cruzar Transferências entre Contas
+                    </button>
                 </div>
+                
+                <div class="tx-table-container">
+                    <table class="tx-table">
+                        <thead>
+                            <tr>
+                                <th>Data</th>
+                                <th>Conta</th>
+                                <th>Descrição</th>
+                                <th>Categoria</th>
+                                <th style="text-align: right;">Valor</th>
+                                <th style="text-align: center; width: 140px;">Classificação</th>
+                            </tr>
+                        </thead>
+                        <tbody id="receitasRealizadasList">
+                            <!-- Carregado via JS -->
+                        </tbody>
+                    </table>
+                </div>
+            </section>
 
-                <!-- Seção Direita: Planejamento de Receitas Estimadas -->
-                <div class="m3-card" style="padding: 24px;">
-                    <div class="card-header-bank" style="border-bottom: 1px solid var(--md-sys-color-outline-variant); padding-bottom: 12px; margin-bottom: 16px; justify-content: space-between; align-items: center;">
-                        <h3 style="font-weight: 600; display: flex; align-items: center; gap: 8px; margin: 0; font-size: 16px;">
+            <!-- SEÇÃO 2: PLANEJAMENTO DE RECEITAS ESTIMADAS (FULL WIDTH) -->
+            <section class="m3-card" style="padding: 24px; margin-bottom: 40px;">
+                <div class="card-header-bank" style="border-bottom: 1px solid var(--md-sys-color-outline-variant); padding-bottom: 12px; margin-bottom: 16px; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px;">
+                    <div>
+                        <h3 style="font-weight: 600; display: flex; align-items: center; gap: 8px; margin: 0; font-size: 17px;">
                             <span class="material-symbols-outlined" style="color: var(--md-sys-color-primary);">savings</span>
                             Expectativas de Receita
                         </h3>
-                        <button class="m3-btn m3-btn-primary" id="openIncomeModalBtn" style="padding: 6px 12px; font-size: 12px; border-radius: 8px; width: auto; display: flex; align-items: center; gap: 4px;">
-                            <span class="material-symbols-outlined" style="font-size: 16px;">add</span>
-                            Adicionar
-                        </button>
+                        <p style="font-size: 13px; color: var(--md-sys-color-outline); margin: 4px 0 0 0;">
+                            Previsões de recebimentos futuros (salários, rendimentos, freelances planejados)
+                        </p>
                     </div>
+                    <button class="m3-btn m3-btn-primary" id="openIncomeModalBtn" style="padding: 8px 18px; font-size: 13px; border-radius: var(--radius-sm); width: auto; display: flex; align-items: center; gap: 6px;">
+                        <span class="material-symbols-outlined" style="font-size: 18px;">add</span>
+                        Adicionar Expectativa
+                    </button>
+                </div>
 
-                    <div class="tx-table-container">
-                        <table class="tx-table">
-                            <thead>
-                                <tr>
-                                    <th>Origem</th>
-                                    <th>Tipo</th>
-                                    <th>Dia / Mês</th>
-                                    <th style="text-align: right;">Valor</th>
-                                    <th></th>
-                                </tr>
-                            </thead>
-                            <tbody id="incomesList">
-                                <!-- Carregado via JS -->
-                            </tbody>
-                        </table>
-                    </div>
+                <div class="tx-table-container">
+                    <table class="tx-table">
+                        <thead>
+                            <tr>
+                                <th>Origem</th>
+                                <th>Tipo</th>
+                                <th>Dia / Mês</th>
+                                <th style="text-align: right;">Valor</th>
+                                <th style="text-align: center; width: 80px;">Ações</th>
+                            </tr>
+                        </thead>
+                        <tbody id="incomesList">
+                            <!-- Carregado via JS -->
+                        </tbody>
+                    </table>
                 </div>
             </section>
 

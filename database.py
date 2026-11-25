@@ -101,6 +101,7 @@ class Account(Base):
     user_id = Column(Integer, ForeignKey("users.id", ondelete="SET NULL"), nullable=True)
     bank_name = Column(String, nullable=False)  # Nubank, Banco Inter, Caixa, etc.
     account_number = Column(String, nullable=True)
+    color = Column(String, default="#48b9c7", nullable=True)
     initial_balance = Column(Float, default=0.0)
     balance = Column(Float, default=0.0)
     
@@ -298,6 +299,8 @@ def init_db():
             
         if not table_has_col("accounts", "workspace_id"):
             conn.exec_driver_sql("ALTER TABLE accounts ADD COLUMN workspace_id INTEGER REFERENCES workspaces(id) ON DELETE CASCADE")
+        if not table_has_col("accounts", "color"):
+            conn.exec_driver_sql("ALTER TABLE accounts ADD COLUMN color VARCHAR DEFAULT '#48b9c7'")
             
         if not table_has_col("transactions", "cost_type"):
             conn.exec_driver_sql("ALTER TABLE transactions ADD COLUMN cost_type VARCHAR DEFAULT 'variavel'")
@@ -334,7 +337,7 @@ def init_db():
             db.commit()
 
         # Popula categorias padrão se alguma estiver faltando no banco
-        defaults = ["Transporte", "Lazer", "Serviços & Assinaturas", "Saúde", "Receita", "Outros", "Loteria", "Mercado", "Restaurante & Delivery", "Pagamento de Fatura", "Moradia & Contas"]
+        defaults = ["Transporte", "Lazer", "Serviços & Assinaturas", "Saúde", "Receita", "Transferência entre Contas", "Outros", "Loteria", "Mercado", "Restaurante & Delivery", "Pagamento de Fatura", "Moradia & Contas"]
         for name in defaults:
             existing = db.query(Category).filter(Category.name == name).first()
             if not existing:

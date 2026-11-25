@@ -3,7 +3,7 @@ let categoryChartInstance = null;
 let evolutionChartInstance = null;
 
 // Categorias disponíveis para seleção manual (inicialmente padrão, atualizadas dinamicamente)
-let CATEGORIES = ["Transporte", "Lazer", "Serviços & Assinaturas", "Saúde", "Receita", "Outros", "Loteria", "Mercado", "Restaurante & Delivery", "Pagamento de Fatura", "Moradia & Contas"];
+let CATEGORIES = ["Transporte", "Lazer", "Serviços & Assinaturas", "Saúde", "Receita", "Transferência entre Contas", "Outros", "Loteria", "Mercado", "Restaurante & Delivery", "Pagamento de Fatura", "Moradia & Contas"];
 
 document.addEventListener("DOMContentLoaded", () => {
     // Carrega dados iniciais do Dashboard
@@ -27,12 +27,15 @@ function setupNewAccountModal() {
             e.preventDefault();
             const bankName = document.getElementById("newAccountBankName").value.trim();
             const initBal = document.getElementById("newAccountInitialBalance").value;
+            const colorInput = document.getElementById("newAccountColor");
+            const color = colorInput ? colorInput.value : "#48b9c7";
             
             if (!bankName) return;
             
             const formData = new FormData();
             formData.append("bank_name", bankName);
             formData.append("initial_balance", initBal);
+            formData.append("color", color);
             
             try {
                 const res = await fetch("/api/accounts", { method: "POST", body: formData });
@@ -87,39 +90,26 @@ function renderAccountsCards(accounts) {
         const card = document.createElement("div");
         card.className = "m3-card bank-render-card";
         
-        // Aplica identidade visual de acordo com o banco
-        const nameLower = acc.bank_name.toLowerCase();
-        if (nameLower.includes("nubank")) {
-            card.classList.add("card-nubank");
-        } else if (nameLower.includes("inter")) {
-            card.classList.add("card-inter");
-        } else if (nameLower.includes("caixa")) {
-            card.classList.add("card-caixa");
-        } else if (nameLower.includes("itau") || nameLower.includes("itaú")) {
-            card.style.borderLeft = "4px solid #ec7000";
-        } else if (nameLower.includes("bradesco")) {
-            card.style.borderLeft = "4px solid #cc092f";
-        } else if (nameLower.includes("santander")) {
-            card.style.borderLeft = "4px solid #ea1d25";
-        } else if (nameLower.includes("c6")) {
-            card.style.borderLeft = "4px solid #242424";
-        } else if (nameLower.includes("bb") || nameLower.includes("brasil")) {
-            card.style.borderLeft = "4px solid #fcee00";
-        } else if (nameLower.includes("mercado") || nameLower.includes("pago")) {
-            card.style.borderLeft = "4px solid #009ee3";
-        } else {
-            card.style.borderLeft = "4px solid var(--md-sys-color-primary)";
-        }
+        // Aplica a cor de destaque customizada do banco
+        const accentColor = acc.color || "#48b9c7";
+        card.style.borderLeft = `5px solid ${accentColor}`;
         
         card.innerHTML = `
             <div class="card-header-bank">
                 <div style="display: flex; align-items: center; gap: 8px;">
-                    <span class="material-symbols-outlined" style="color: var(--md-sys-color-primary);">account_balance</span>
-                    <h3>${acc.bank_name}</h3>
+                    <span class="material-symbols-outlined" style="color: ${accentColor}; font-size: 22px;">account_balance</span>
+                    <h3 style="margin: 0; font-size: 16px;">${acc.bank_name}</h3>
                 </div>
-                <button type="button" onclick="deleteBankAccount(${acc.id}, '${acc.bank_name}')" style="background: none; border: none; cursor: pointer; color: var(--md-sys-color-outline); padding: 4px; border-radius: 50%; display: flex; align-items: center; transition: color 0.2s;" title="Excluir conta ${acc.bank_name}">
-                    <span class="material-symbols-outlined" style="font-size: 19px;">delete</span>
-                </button>
+                <div style="display: flex; align-items: center; gap: 6px;">
+                    <!-- Seletor de Accent Color -->
+                    <label title="Alterar cor de destaque do banco" style="cursor: pointer; display: flex; align-items: center; justify-content: center; position: relative; width: 26px; height: 26px; border-radius: 50%; background: var(--glass-input-bg); border: 1px solid var(--md-sys-color-outline-variant);">
+                        <span class="material-symbols-outlined" style="font-size: 16px; color: ${accentColor};">palette</span>
+                        <input type="color" value="${accentColor}" onchange="changeBankColor(${acc.id}, this.value)" style="position: absolute; opacity: 0; width: 100%; height: 100%; cursor: pointer;">
+                    </label>
+                    <button type="button" onclick="deleteBankAccount(${acc.id}, '${acc.bank_name}')" style="background: none; border: none; cursor: pointer; color: var(--md-sys-color-outline); padding: 4px; border-radius: 50%; display: flex; align-items: center; transition: color 0.2s;" title="Excluir conta ${acc.bank_name}">
+                        <span class="material-symbols-outlined" style="font-size: 19px;">delete</span>
+                    </button>
+                </div>
             </div>
             <div class="balance-display">${formatCurrency(acc.balance)}</div>
             
@@ -197,8 +187,30 @@ function closeNewAccountModal() {
         overlay.classList.remove("active");
         const nameInput = document.getElementById("newAccountBankName");
         const balInput = document.getElementById("newAccountInitialBalance");
+        const colorInput = document.getElementById("newAccountColor");
         if (nameInput) nameInput.value = "";
         if (balInput) balInput.value = "0.00";
+        if (colorInput) colorInput.value = "#48b9c7";
+    }
+}
+
+// Altera a cor de destaque (accent color) da conta bancária
+async function changeBankColor(accountId, newColor) {
+    const formData = new FormData();
+    formData.append("color", newColor);
+    try {
+        const res = await fetch(`/api/accounts/${accountId}/color`, {
+            method: "POST",
+            body: formData
+        });
+        if (res.ok) {
+            loadDashboardData();
+        } else {
+            const data = await res.json();
+            alert("Erro ao alterar cor: " + data.detail);
+        }
+    } catch (err) {
+        console.error("Erro ao alterar cor do banco:", err);
     }
 }
 

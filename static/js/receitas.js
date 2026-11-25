@@ -1,7 +1,7 @@
 // Estado global da página de receitas
 let allAccounts = [];
 let futureIncomes = [];
-let CATEGORIES = ["Receita", "Transporte", "Lazer", "Serviços & Assinaturas", "Saúde", "Outros", "Loteria", "Mercado", "Restaurante & Delivery", "Pagamento de Fatura", "Moradia & Contas"];
+let CATEGORIES = ["Receita", "Transferência entre Contas", "Transporte", "Lazer", "Serviços & Assinaturas", "Saúde", "Outros", "Loteria", "Mercado", "Restaurante & Delivery", "Pagamento de Fatura", "Moradia & Contas"];
 
 document.addEventListener("DOMContentLoaded", () => {
     // Carrega dados iniciais da tela
@@ -161,7 +161,7 @@ function setupFilters() {
     // Vincula todos os demais filtros de dropdown e input
     const filterIds = [
         "accountFilter", "dayFilter", "monthFilter", "yearFilter",
-        "startDateFilter", "endDateFilter", "categoryFilter", "searchInput"
+        "startDateFilter", "endDateFilter", "categoryFilter", "transferFilter", "searchInput"
     ];
     
     filterIds.forEach(id => {
@@ -239,6 +239,15 @@ function processAndRenderReceitas() {
         realizedReceitas = realizedReceitas.filter(tx => tx.category === categoryFilterValue);
     }
     
+    // 3.5 Filtra por Tipo de Entrada (Receitas Reais vs Transferências entre Contas)
+    const transferFilterEl = document.getElementById("transferFilter");
+    const transferFilterValue = transferFilterEl ? transferFilterEl.value : "receitas_only";
+    if (transferFilterValue === "receitas_only") {
+        realizedReceitas = realizedReceitas.filter(tx => tx.category !== "Transferência entre Contas");
+    } else if (transferFilterValue === "transfers_only") {
+        realizedReceitas = realizedReceitas.filter(tx => tx.category === "Transferência entre Contas");
+    }
+    
     // 4. Filtra por busca de nome
     const searchVal = document.getElementById("searchInput").value.trim().toLowerCase();
     if (searchVal) {
@@ -248,10 +257,12 @@ function processAndRenderReceitas() {
     // Ordena do mais recente ao mais antigo
     realizedReceitas.sort((a, b) => parseDateStr(b.date) - parseDateStr(a.date));
     
-    // 5. Calcula Totais
+    // 5. Calcula Totais (Desconsidera Transferências entre Contas para não inflar a renda)
     let totalRealized = 0;
     realizedReceitas.forEach(r => {
-        totalRealized += r.amount;
+        if (r.category !== "Transferência entre Contas") {
+            totalRealized += r.amount;
+        }
     });
     
     let totalEstimated = 0;
@@ -297,8 +308,8 @@ function renderRealizedTable(realized) {
     if (realized.length === 0) {
         list.innerHTML = `
             <tr>
-                <td colspan="5" style="text-align: center; color: var(--md-sys-color-outline); padding: 32px;">
-                    Nenhuma receita encontrada para os filtros selecionados.
+                <td colspan="6" style="text-align: center; color: var(--md-sys-color-outline); padding: 32px;">
+                    Nenhuma entrada encontrada para os filtros selecionados.
                 </td>
             </tr>
         `;
@@ -319,8 +330,11 @@ function renderRealizedTable(realized) {
         }
         const bankBadgeHtml = `<span class="badge-bank ${bankBadgeClass}">${tx.bankName}</span>`;
         
+        const isTransfer = tx.category === "Transferência entre Contas";
         let typeBadge = "";
-        if (tx.type === "PIX_RECEBIDO") {
+        if (isTransfer) {
+            typeBadge = `<span class="badge-pix" style="background: rgba(72, 185, 199, 0.18); color: #007788; border: 1px solid rgba(72, 185, 199, 0.35); font-weight: 600;"><span class="material-symbols-outlined" style="font-size: 13px; vertical-align: middle;">sync_alt</span> Transferência</span> `;
+        } else if (tx.type === "PIX_RECEBIDO") {
             typeBadge = `<span class="badge-pix" style="background: var(--md-sys-color-primary-container); color: var(--md-sys-color-on-primary-container);">PIX In</span> `;
         } else if (tx.type === "CREDIT") {
             typeBadge = `<span class="badge-pix" style="background: #E8F5E9; color: #2E7D32;">CRÉDITO</span> `;
@@ -334,12 +348,28 @@ function renderRealizedTable(realized) {
         });
         selectHtml += "</select>";
         
+        let actionBtnHtml = "";
+        if (isTransfer) {
+            actionBtnHtml = `
+                <button type="button" onclick="toggleTransferStatus(${tx.id}, false)" class="m3-btn" style="width: auto; padding: 4px 10px; font-size: 11.5px; min-height: 28px; background: var(--glass-input-bg); border: 1px solid var(--md-sys-color-outline-variant);" title="Reverter para Receita Real">
+                    Desmarcar ✕
+                </button>
+            `;
+        } else {
+            actionBtnHtml = `
+                <button type="button" onclick="toggleTransferStatus(${tx.id}, true)" class="m3-btn" style="width: auto; padding: 4px 10px; font-size: 11.5px; min-height: 28px; background: rgba(72, 185, 199, 0.12); color: var(--md-sys-color-primary); border: 1px solid rgba(72, 185, 199, 0.28);" title="Indicar que este lançamento é transferência entre suas contas">
+                    ⇄ É Transferência
+                </button>
+            `;
+        }
+        
         row.innerHTML = `
             <td class="col-date" style="color: var(--md-sys-color-secondary); font-weight: 500;">${tx.date}</td>
             <td class="col-bank">${bankBadgeHtml}</td>
             <td class="col-desc">${typeBadge}${tx.description}</td>
             <td class="col-category">${selectHtml}</td>
-            <td class="col-amount tx-amount amount-income" style="font-weight: 600; text-align: right;">${formatCurrency(tx.amount)}</td>
+            <td class="col-amount tx-amount" style="font-weight: 600; text-align: right; color: ${isTransfer ? 'var(--md-sys-color-outline)' : 'var(--md-sys-color-income)'};">${formatCurrency(tx.amount)}</td>
+            <td style="text-align: center;">${actionBtnHtml}</td>
         `;
         
         list.appendChild(row);
@@ -577,4 +607,44 @@ function setupResponsiveMenuAndThemes() {
 
     if (mobileThemeToggle) mobileThemeToggle.addEventListener("click", toggleTheme);
     if (desktopThemeToggle) desktopThemeToggle.addEventListener("click", toggleTheme);
+}
+
+// Altera status de transferência entre contas com 1 clique
+async function toggleTransferStatus(transactionId, isTransfer) {
+    const newCategory = isTransfer ? "Transferência entre Contas" : "Receita";
+    await changeCategory(transactionId, newCategory);
+}
+
+// Cruzamento Automático Inteligente de Transferências entre Contas
+async function autoMatchTransfers() {
+    const btn = document.getElementById("btnAutoMatchTransfers");
+    if (btn) {
+        btn.disabled = true;
+        btn.innerHTML = `<span class="material-symbols-outlined" style="font-size: 17px; animation: spin 1s linear infinite;">sync</span> Cruzando...`;
+    }
+    try {
+        const res = await fetch("/api/transfers/detect-and-match", { method: "POST" });
+        const data = await res.json();
+        if (res.ok) {
+            let msg = data.message || "Cruzamento de transferências realizado com sucesso!";
+            if (data.matches && data.matches.length > 0) {
+                const details = data.matches.map(m => 
+                    `• R$ ${m.amount.toFixed(2)}: ${m.outflow_bank} (${m.outflow_date}) ➔ ${m.inflow_bank} (${m.inflow_date})`
+                ).join("\n");
+                alert(`${msg}\n\nTransferências identificadas entre suas contas:\n${details}`);
+            } else {
+                alert(msg);
+            }
+            await loadReceitasData();
+        } else {
+            alert("Erro ao cruzar transferências: " + data.detail);
+        }
+    } catch (err) {
+        alert("Erro de comunicação ao cruzar transferências.");
+    } finally {
+        if (btn) {
+            btn.disabled = false;
+            btn.innerHTML = `<span class="material-symbols-outlined" style="font-size: 17px; color: var(--md-sys-color-primary);">sync_alt</span> Cruzar Transferências entre Contas`;
+        }
+    }
 }

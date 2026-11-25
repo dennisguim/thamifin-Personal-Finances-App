@@ -273,6 +273,14 @@
                 <input type="number" step="0.01" id="newAccountInitialBalance" value="0.00" required class="filter-select">
             </div>
 
+            <div style="display: flex; flex-direction: column; gap: 6px;">
+                <label for="newAccountColor" style="font-size: 13px; font-weight: 600; color: var(--md-sys-color-outline);">Cor de Destaque (Accent Color):</label>
+                <div style="display: flex; align-items: center; gap: 10px;">
+                    <input type="color" id="newAccountColor" value="#48b9c7" style="width: 48px; height: 38px; padding: 2px; border-radius: var(--radius-sm); border: 1px solid var(--md-sys-color-outline-variant); cursor: pointer; background: var(--glass-input-bg);">
+                    <span style="font-size: 12.5px; color: var(--md-sys-color-outline);">Personalize a cor do cartão e borda</span>
+                </div>
+            </div>
+
             <button type="submit" class="m3-btn m3-btn-primary" style="margin-top: 8px;">Adicionar Banco</button>
         </form>
     </div>
