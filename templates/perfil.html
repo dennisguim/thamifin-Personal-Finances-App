@@ -228,10 +228,10 @@
                             
                             <div style="display: flex; flex-direction: column; gap: 10px;">
                                 {% for acc in workspace_accounts %}
-                                <div style="display: flex; align-items: center; justify-content: space-between; padding: 12px 16px; border-radius: var(--radius-md); background: var(--glass-input-bg); border: 1px solid var(--md-sys-color-outline-variant); border-left: 5px solid {{ acc.color or '#48b9c7' }}; gap: 14px;">
+                                <div style="display: flex; align-items: center; justify-content: space-between; padding: 12px 16px; border-radius: var(--radius-md); background: var(--glass-input-bg); border: 1px solid var(--md-sys-color-outline-variant); border-left: 6px solid {{ acc.color or '#48b9c7' }}; gap: 14px;">
                                     <div style="display: flex; align-items: center; gap: 12px; min-width: 0;">
                                         <!-- Círculo de Amostra preenchido com a cor de destaque do banco -->
-                                        <span onclick="document.getElementById('profileBankColor_{{ acc.id }}').click()" title="Cor de destaque atual (clique para alterar)" style="cursor: pointer; display: inline-block; width: 22px; height: 22px; min-width: 22px; min-height: 22px; border-radius: 50%; background-color: {{ acc.color or '#48b9c7' }}; border: 2.5px solid var(--md-sys-color-surface); box-shadow: 0 0 0 2px {{ acc.color or '#48b9c7' }}, 0 2px 5px rgba(0,0,0,0.2); flex-shrink: 0;"></span>
+                                        <span onclick="document.getElementById('profileBankColor_{{ acc.id }}').click()" title="Cor de destaque do {{ acc.bank_name }} (clique para alterar)" style="cursor: pointer; display: block; width: 22px; height: 22px; min-width: 22px; min-height: 22px; border-radius: 50%; background-color: {{ acc.color or '#48b9c7' }}; border: 3px solid #ffffff; box-shadow: 0 0 0 1.5px rgba(0,0,0,0.18), 0 2px 6px rgba(0,0,0,0.25); flex-shrink: 0;"></span>
                                         
                                         <div style="min-width: 0;">
                                             <div style="font-size: 15px; font-weight: 700; color: var(--md-sys-color-on-surface); line-height: 1.2;">

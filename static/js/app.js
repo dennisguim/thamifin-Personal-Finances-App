@@ -288,7 +288,8 @@ function renderTransactions(accounts) {
         acc.transactions.forEach(tx => {
             allTransactions.push({
                 ...tx,
-                bankName: acc.bank_name
+                bankName: acc.bank_name,
+                bankColor: acc.color || "#48b9c7"
             });
         });
     });
@@ -352,9 +353,11 @@ function renderTransactions(accounts) {
             }
         }
         
+        const bankBadgeHtml = `<span class="badge-bank" style="background-color: ${tx.bankColor || '#48b9c7'}; color: #ffffff;">${tx.bankName}</span>`;
+        
         row.innerHTML = `
             <td class="col-date" style="color: var(--md-sys-color-secondary); font-weight: 500;">${tx.date}</td>
-            <td class="col-bank" style="font-weight: 600;">${tx.bankName}</td>
+            <td class="col-bank">${bankBadgeHtml}</td>
             <td class="col-desc">
                 <div style="display: flex; align-items: center; justify-content: space-between; gap: 8px; width: 100%;">
                     <span>${typeBadge}${tx.description}</span>

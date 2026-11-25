@@ -225,7 +225,8 @@ function processAndRenderReceitas() {
                 realizedReceitas.push({
                     ...tx,
                     accountId: acc.id,
-                    bankName: acc.bank_name
+                    bankName: acc.bank_name,
+                    bankColor: acc.color || "#48b9c7"
                 });
             }
         });
@@ -320,15 +321,8 @@ function renderRealizedTable(realized) {
         const row = document.createElement("tr");
         row.className = "tx-row";
         
-        let bankBadgeClass = "badge-bank-default";
-        if (tx.bankName.toLowerCase().includes("nubank")) {
-            bankBadgeClass = "badge-bank-nubank";
-        } else if (tx.bankName.toLowerCase().includes("inter")) {
-            bankBadgeClass = "badge-bank-inter";
-        } else if (tx.bankName.toLowerCase().includes("caixa")) {
-            bankBadgeClass = "badge-bank-caixa";
-        }
-        const bankBadgeHtml = `<span class="badge-bank ${bankBadgeClass}">${tx.bankName}</span>`;
+        const bankColor = tx.bankColor || "#48b9c7";
+        const bankBadgeHtml = `<span class="badge-bank" style="background-color: ${bankColor}; color: #ffffff;">${tx.bankName}</span>`;
         
         const isTransfer = tx.category === "Transferência entre Contas";
         let typeBadge = "";

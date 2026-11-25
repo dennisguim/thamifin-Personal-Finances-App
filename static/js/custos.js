@@ -226,7 +226,8 @@ function processAndRenderCosts() {
                 costs.push({
                     ...tx,
                     accountId: acc.id,
-                    bankName: acc.bank_name
+                    bankName: acc.bank_name,
+                    bankColor: acc.color || "#48b9c7"
                 });
             }
         });
@@ -342,15 +343,8 @@ function renderCostsTable(costs) {
         row.className = "tx-row";
         
         // Badge do banco
-        let bankBadgeClass = "badge-bank-default";
-        if (tx.bankName.toLowerCase().includes("nubank")) {
-            bankBadgeClass = "badge-bank-nubank";
-        } else if (tx.bankName.toLowerCase().includes("inter")) {
-            bankBadgeClass = "badge-bank-inter";
-        } else if (tx.bankName.toLowerCase().includes("caixa")) {
-            bankBadgeClass = "badge-bank-caixa";
-        }
-        const bankBadgeHtml = `<span class="badge-bank ${bankBadgeClass}">${tx.bankName}</span>`;
+        const bankColor = tx.bankColor || "#48b9c7";
+        const bankBadgeHtml = `<span class="badge-bank" style="background-color: ${bankColor}; color: #ffffff;">${tx.bankName}</span>`;
         
         // Badge de PIX
         let typeBadge = "";

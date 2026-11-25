@@ -238,7 +238,7 @@
                                 <td>
                                     <div style="display: flex; flex-wrap: wrap; gap: 6px; align-items: center;">
                                         {% for acc in ws.accounts %}
-                                            <span class="badge-bank badge-bank-{% if 'nubank' in acc.bank_name.lower() %}nubank{% elif 'inter' in acc.bank_name.lower() %}inter{% elif 'caixa' in acc.bank_name.lower() %}caixa{% else %}default{% endif %}" title="R$ {{ '%.2f'|format(acc.balance) }}">
+                                            <span class="badge-bank" style="background-color: {{ acc.color or '#48b9c7' }}; color: #ffffff;" title="R$ {{ '%.2f'|format(acc.balance) }}">
                                                 {{ acc.bank_name }}
                                             </span>
                                         {% else %}

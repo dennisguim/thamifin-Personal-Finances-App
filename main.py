@@ -906,7 +906,11 @@ def create_bank_account(
         raise HTTPException(status_code=400, detail="O nome do banco não pode ser vazio.")
         
     workspace = get_user_workspace(current_user, db)
-    chosen_color = color.strip() if color and color.strip() else get_default_bank_color(name_clean)
+    default_brand = get_default_bank_color(name_clean)
+    if color and color.strip() and color.strip().lower() != "#48b9c7":
+        chosen_color = color.strip()
+    else:
+        chosen_color = default_brand
     if not chosen_color.startswith("#"):
         chosen_color = f"#{chosen_color}"
     
