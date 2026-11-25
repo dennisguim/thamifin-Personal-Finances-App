@@ -1,0 +1,815 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="theme-color" content="#f6f8fb" id="themeColorMeta">
+    <title>Painel Administrativo - ThamiFin</title>
+    <!-- Google Fonts & Material Symbols -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0" rel="stylesheet">
+    <link rel="stylesheet" href="/static/css/style.css">
+</head>
+<body>
+    <script>
+        const savedTheme = localStorage.getItem("theme");
+        const systemPrefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
+        const isDark = savedTheme === "dark" || (!savedTheme && systemPrefersDark);
+        if (isDark) {
+            document.body.classList.add("dark-mode");
+        }
+        const metaTheme = document.getElementById("themeColorMeta");
+        if (metaTheme) metaTheme.setAttribute("content", isDark ? "#10141d" : "#f6f8fb");
+    </script>
+
+    <!-- OVERLAY DE BACKDROP DA SIDEBAR MOBILE -->
+    <div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+    <!-- CABEÇALHO DO MOBILE -->
+    <header class="mobile-header">
+        <button class="hamburger-btn" id="mobileMenuBtn" title="Menu lateral">
+            <span class="material-symbols-outlined">menu</span>
+        </button>
+        <div class="mobile-brand">
+            <img src="/static/thami-logo.png" alt="ThamiFin Logo" class="mobile-logo">
+            <span>ThamiFin</span>
+        </div>
+        <button class="theme-toggle-btn" id="mobileThemeToggleBtn" title="Alternar tema">
+            <span class="material-symbols-outlined" id="mobileThemeToggleIcon">dark_mode</span>
+        </button>
+    </header>
+
+    <div class="dashboard-layout">
+        
+        <!-- SIDEBAR DE NAVEGAÇÃO LATERAL -->
+        <aside class="m3-sidebar" id="dashboardSidebar">
+            <div class="sidebar-top">
+                <div class="logo-section">
+                    <h2>
+                        <img src="/static/thami-logo.png" alt="ThamiFin Logo" class="sidebar-logo">
+                        ThamiFin
+                    </h2>
+                    <button class="close-sidebar-btn" id="closeSidebarBtn" title="Fechar menu">
+                        <span class="material-symbols-outlined">close</span>
+                    </button>
+                </div>
+                
+                <nav>
+                    <ul class="nav-links">
+                        <li class="nav-item">
+                            <a href="/dashboard">
+                                <span class="material-symbols-outlined">dashboard</span>
+                                Visão Geral
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a href="/receitas">
+                                <span class="material-symbols-outlined">trending_up</span>
+                                Receitas
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a href="/custos">
+                                <span class="material-symbols-outlined">payments</span>
+                                Custos Fixos / Variáveis
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a href="/parcelamentos">
+                                <span class="material-symbols-outlined">credit_card</span>
+                                Parcelamentos
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a href="/graficos">
+                                <span class="material-symbols-outlined">bar_chart</span>
+                                Gráficos
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a href="/metas">
+                                <span class="material-symbols-outlined">flag</span>
+                                Planejador / Metas
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a href="/perfil">
+                                <span class="material-symbols-outlined">person</span>
+                                Meu Perfil
+                            </a>
+                        </li>
+                        {% if user.is_admin %}
+                        <li class="nav-item active">
+                            <a href="/admin">
+                                <span class="material-symbols-outlined">admin_panel_settings</span>
+                                Painel Admin
+                            </a>
+                        </li>
+                        {% endif %}
+                    </ul>
+                </nav>
+            </div>
+            
+            <div class="sidebar-bottom" style="display: flex; flex-direction: column; gap: 16px;">
+                <div style="display: flex; justify-content: flex-end; padding-right: 8px;">
+                    <button class="theme-toggle-btn" id="desktopThemeToggleBtn" title="Alternar tema claro/escuro">
+                        <span class="material-symbols-outlined" id="desktopThemeToggleIcon">dark_mode</span>
+                    </button>
+                </div>
+
+                <a href="/perfil" class="user-badge" style="text-decoration: none; color: inherit;" title="Ver meu perfil">
+                    <span class="material-symbols-outlined" style="font-size: 32px; color: var(--md-sys-color-primary);">account_circle</span>
+                    <div class="user-info" style="flex-grow: 1;">
+                        <h4>{{ user.full_name }}</h4>
+                        <p style="color: var(--md-sys-color-primary); font-weight: 600;">Administrador</p>
+                    </div>
+                    <a href="/auth/logout" style="color: var(--md-sys-color-error); display: flex;" title="Sair">
+                        <span class="material-symbols-outlined">logout</span>
+                    </a>
+                </a>
+            </div>
+        </aside>
+
+        <!-- CONTEÚDO PRINCIPAL DO ADMIN -->
+        <main class="m3-main-content">
+            
+            <header class="header-dashboard">
+                <div class="header-title">
+                    <div style="display: flex; align-items: center; gap: 10px;">
+                        <span class="material-symbols-outlined" style="color: var(--md-sys-color-primary); font-size: 32px;">admin_panel_settings</span>
+                        <h1>Painel Administrativo da Plataforma</h1>
+                    </div>
+                    <p>Gerencie bancos de dados, contas de usuários e vínculos de acesso com isolamento total</p>
+                </div>
+                <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+                    <button class="m3-btn m3-btn-primary" id="openNewUserModalBtn" style="width: auto;">
+                        <span class="material-symbols-outlined">person_add</span>
+                        Novo Usuário
+                    </button>
+                    <button class="m3-btn" id="openNewWorkspaceModalBtn" style="width: auto; background: var(--md-sys-color-secondary-container); color: var(--md-sys-color-secondary);">
+                        <span class="material-symbols-outlined">dns</span>
+                        Novo Banco de Dados
+                    </button>
+                </div>
+            </header>
+
+            <!-- CARDS DE ESTATÍSTICAS DA PLATAFORMA -->
+            <section class="finance-grid" style="grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));">
+                <div class="m3-card">
+                    <div class="card-header-bank">
+                        <h3 style="font-size: 15px; color: var(--md-sys-color-outline);">Total de Usuários</h3>
+                        <span class="material-symbols-outlined" style="color: var(--md-sys-color-primary);">group</span>
+                    </div>
+                    <div class="balance-display">{{ stats.total_users }}</div>
+                    <span style="font-size: 12px; color: var(--md-sys-color-outline);">Logins cadastrados no sistema</span>
+                </div>
+
+                <div class="m3-card">
+                    <div class="card-header-bank">
+                        <h3 style="font-size: 15px; color: var(--md-sys-color-outline);">Bancos de Dados</h3>
+                        <span class="material-symbols-outlined" style="color: var(--md-sys-color-secondary);">dns</span>
+                    </div>
+                    <div class="balance-display">{{ stats.total_workspaces }}</div>
+                    <span style="font-size: 12px; color: var(--md-sys-color-outline);">Espaços financeiros isolados</span>
+                </div>
+
+                <div class="m3-card">
+                    <div class="card-header-bank">
+                        <h3 style="font-size: 15px; color: var(--md-sys-color-outline);">Contas Bancárias</h3>
+                        <span class="material-symbols-outlined" style="color: #ff7a00;">account_balance</span>
+                    </div>
+                    <div class="balance-display">{{ stats.total_accounts }}</div>
+                    <span style="font-size: 12px; color: var(--md-sys-color-outline);">Contas ativas (Nubank, Inter, etc)</span>
+                </div>
+
+                <div class="m3-card">
+                    <div class="card-header-bank">
+                        <h3 style="font-size: 15px; color: var(--md-sys-color-outline);">Transações Totais</h3>
+                        <span class="material-symbols-outlined" style="color: var(--md-sys-color-income);">receipt_long</span>
+                    </div>
+                    <div class="balance-display">{{ stats.total_transactions }}</div>
+                    <span style="font-size: 12px; color: var(--md-sys-color-outline);">Movimentações importadas</span>
+                </div>
+            </section>
+
+            <!-- SEÇÃO 1: BANCOS DE DADOS / ESPAÇOS FINANCEIROS -->
+            <section class="transactions-section">
+                <div class="section-header">
+                    <div>
+                        <h3 style="font-size: 18px; font-weight: 700; display: flex; align-items: center; gap: 8px;">
+                            <span class="material-symbols-outlined" style="color: var(--md-sys-color-primary);">database</span>
+                            Bancos de Dados / Espaços Financeiros
+                        </h3>
+                        <p style="font-size: 13px; color: var(--md-sys-color-outline);">Cada banco de dados é um ambiente isolado com suas próprias contas bancárias e extratos</p>
+                    </div>
+                </div>
+
+                <div class="tx-table-container">
+                    <table class="tx-table">
+                        <thead>
+                            <tr>
+                                <th>Nome do Banco de Dados</th>
+                                <th>Identificador</th>
+                                <th>Proprietário</th>
+                                <th>Contas Bancárias Vinculadas</th>
+                                <th>Logins com Acesso</th>
+                                <th style="text-align: right;">Ações</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for ws in all_workspaces %}
+                            <tr class="tx-row">
+                                <td style="font-weight: 600;">
+                                    <span class="material-symbols-outlined" style="font-size: 16px; vertical-align: middle; color: var(--md-sys-color-primary); margin-right: 4px;">folder</span>
+                                    {{ ws.name }}
+                                </td>
+                                <td>
+                                    <code style="background: var(--glass-input-bg); padding: 3px 8px; border-radius: var(--radius-xs); font-size: 12px;">{{ ws.db_identifier }}</code>
+                                </td>
+                                <td>
+                                    {% if ws.owner %}
+                                        {{ ws.owner.full_name }}
+                                    {% else %}
+                                        <span style="color: var(--md-sys-color-outline);">Sem proprietário</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    <div style="display: flex; flex-wrap: wrap; gap: 6px; align-items: center;">
+                                        {% for acc in ws.accounts %}
+                                            <span class="badge-bank badge-bank-{% if 'nubank' in acc.bank_name.lower() %}nubank{% elif 'inter' in acc.bank_name.lower() %}inter{% elif 'caixa' in acc.bank_name.lower() %}caixa{% else %}default{% endif %}" title="R$ {{ '%.2f'|format(acc.balance) }}">
+                                                {{ acc.bank_name }}
+                                            </span>
+                                        {% else %}
+                                            <span style="font-size: 12px; color: var(--md-sys-color-outline);">Nenhuma conta</span>
+                                        {% endfor %}
+                                        <button onclick="openAddAccountModal({{ ws.id }}, '{{ ws.name }}')" style="background: var(--glass-input-bg); border: 1px dashed var(--md-sys-color-outline-variant); border-radius: var(--radius-full); padding: 2px 8px; font-size: 11px; cursor: pointer; color: var(--md-sys-color-primary);" title="Adicionar Conta Bancária a este BD">
+                                            + Conta
+                                        </button>
+                                    </div>
+                                </td>
+                                <td>
+                                    <div style="display: flex; flex-wrap: wrap; gap: 4px;">
+                                        {% for member in ws.members %}
+                                            <span style="background: var(--md-sys-color-primary-container); color: var(--md-sys-color-primary); padding: 2px 8px; border-radius: var(--radius-full); font-size: 11px; font-weight: 600;">
+                                                {{ member.user.full_name.split()[0] }}
+                                            </span>
+                                        {% else %}
+                                            <span style="font-size: 12px; color: var(--md-sys-color-outline);">Nenhum usuário</span>
+                                        {% endfor %}
+                                    </div>
+                                </td>
+                                <td style="text-align: right;">
+                                    <button onclick="openLinkModalForWorkspace({{ ws.id }}, '{{ ws.name }}')" class="m3-btn" style="width: auto; padding: 6px 12px; min-height: 34px; font-size: 12px; display: inline-flex; background: var(--md-sys-color-primary-container); color: var(--md-sys-color-primary);">
+                                        <span class="material-symbols-outlined" style="font-size: 16px;">link</span>
+                                        Vincular Login
+                                    </button>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+
+            <!-- SEÇÃO 2: USUÁRIOS E VÍNCULOS COM BANCOS DE DADOS -->
+            <section class="transactions-section">
+                <div class="section-header">
+                    <div>
+                        <h3 style="font-size: 18px; font-weight: 700; display: flex; align-items: center; gap: 8px;">
+                            <span class="material-symbols-outlined" style="color: var(--md-sys-color-secondary);">group</span>
+                            Contas de Usuários (Logins) e Vínculos
+                        </h3>
+                        <p style="font-size: 13px; color: var(--md-sys-color-outline);">Defina a qual banco de dados cada conta de usuário tem acesso na plataforma</p>
+                    </div>
+                </div>
+
+                <div class="tx-table-container">
+                    <table class="tx-table">
+                        <thead>
+                            <tr>
+                                <th>Usuário / Nome</th>
+                                <th>Email</th>
+                                <th>Nível de Acesso</th>
+                                <th>Banco de Dados Ativo</th>
+                                <th>Bancos de Dados com Acesso</th>
+                                <th style="text-align: right;">Ações</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for u in all_users %}
+                            <tr class="tx-row">
+                                <td style="font-weight: 600;">
+                                    <div style="display: flex; align-items: center; gap: 8px;">
+                                        <span class="material-symbols-outlined" style="color: var(--md-sys-color-primary);">account_circle</span>
+                                        {{ u.full_name }}
+                                    </div>
+                                </td>
+                                <td>{{ u.email }}</td>
+                                <td>
+                                    {% if u.is_admin %}
+                                        <span style="background: var(--md-sys-color-primary-container); color: var(--md-sys-color-primary); padding: 3px 10px; border-radius: var(--radius-full); font-size: 11.5px; font-weight: 700;">
+                                            ADMIN
+                                        </span>
+                                    {% else %}
+                                        <span style="background: var(--md-sys-color-surface-container-high); color: var(--md-sys-color-outline); padding: 3px 10px; border-radius: var(--radius-full); font-size: 11.5px; font-weight: 600;">
+                                            Usuário
+                                        </span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    {% set active_ws = u.get_active_workspace(db) %}
+                                    {% if active_ws %}
+                                        <span style="font-weight: 600; color: var(--md-sys-color-on-surface);">
+                                            {{ active_ws.name }}
+                                        </span>
+                                        <span style="font-size: 11px; color: var(--md-sys-color-outline);">({{ active_ws.db_identifier }})</span>
+                                    {% else %}
+                                        <span style="color: var(--md-sys-color-error); font-size: 12px;">Nenhum ativo</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    <div style="display: flex; flex-wrap: wrap; gap: 6px; align-items: center;">
+                                        {% for m in u.workspace_memberships %}
+                                            <span style="background: var(--glass-input-bg); border: 1px solid var(--md-sys-color-outline-variant); padding: 2px 8px; border-radius: var(--radius-full); font-size: 11px; display: inline-flex; align-items: center; gap: 4px;">
+                                                {{ m.workspace.name }}
+                                                {% if m.workspace_id != u.current_workspace_id %}
+                                                <button onclick="unlinkUserWorkspace({{ u.id }}, {{ m.workspace_id }})" style="background: none; border: none; cursor: pointer; color: var(--md-sys-color-error); padding: 0; display: flex;" title="Desvincular deste BD">
+                                                    <span class="material-symbols-outlined" style="font-size: 13px;">close</span>
+                                                </button>
+                                                {% endif %}
+                                            </span>
+                                        {% else %}
+                                            <span style="font-size: 12px; color: var(--md-sys-color-outline);">Sem vínculos</span>
+                                        {% endfor %}
+                                    </div>
+                                </td>
+                                <td style="text-align: right;">
+                                    <div style="display: flex; gap: 6px; justify-content: flex-end;">
+                                        <button onclick="openLinkModalForUser({{ u.id }}, '{{ u.full_name }}')" class="m3-btn" style="width: auto; padding: 6px 12px; min-height: 34px; font-size: 12px; background: var(--md-sys-color-primary-container); color: var(--md-sys-color-primary);">
+                                            <span class="material-symbols-outlined" style="font-size: 16px;">add_link</span>
+                                            Vincular a BD
+                                        </button>
+                                        <button onclick="toggleAdminStatus({{ u.id }})" class="m3-btn" style="width: auto; padding: 6px 12px; min-height: 34px; font-size: 12px; background: var(--glass-input-bg); border: 1px solid var(--md-sys-color-outline-variant); color: var(--md-sys-color-outline);">
+                                            <span class="material-symbols-outlined" style="font-size: 16px;">admin_panel_settings</span>
+                                            {% if u.is_admin %}Tirar Admin{% else %}Tornar Admin{% endif %}
+                                        </button>
+                                    </div>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+
+        </main>
+    </div>
+
+    <!-- MODAL: NOVO USUÁRIO -->
+    <div class="modal-backdrop" id="userModalOverlay"></div>
+    <div class="m3-modal" id="createUserModal" style="max-width: 460px;">
+        <div class="card-header-bank" style="border-bottom: 1px solid var(--md-sys-color-outline-variant); padding-bottom: 12px; margin-bottom: 16px;">
+            <h3 style="font-weight: 600; display: flex; align-items: center; gap: 8px; margin: 0; font-size: 18px;">
+                <span class="material-symbols-outlined" style="color: var(--md-sys-color-primary);">person_add</span>
+                Cadastrar Novo Usuário
+            </h3>
+            <button class="close-sidebar-btn" id="closeUserModalBtn" style="display: flex;" title="Fechar">
+                <span class="material-symbols-outlined">close</span>
+            </button>
+        </div>
+        
+        <form id="createUserForm" style="display: flex; flex-direction: column; gap: 16px;">
+            <div style="display: flex; flex-direction: column; gap: 6px;">
+                <label for="userName" style="font-size: 13px; font-weight: 600; color: var(--md-sys-color-outline);">Nome Completo:</label>
+                <input type="text" id="userName" placeholder="Ex: Maria Santos" required class="filter-select">
+            </div>
+
+            <div style="display: flex; flex-direction: column; gap: 6px;">
+                <label for="userEmail" style="font-size: 13px; font-weight: 600; color: var(--md-sys-color-outline);">Email / Login:</label>
+                <input type="email" id="userEmail" placeholder="maria@exemplo.com" required class="filter-select">
+            </div>
+
+            <div style="display: flex; flex-direction: column; gap: 6px;">
+                <label for="userPassword" style="font-size: 13px; font-weight: 600; color: var(--md-sys-color-outline);">Senha Inicial:</label>
+                <input type="password" id="userPassword" placeholder="Mínimo 6 caracteres" required class="filter-select">
+            </div>
+
+            <div style="display: flex; flex-direction: column; gap: 6px;">
+                <label for="userWorkspaceSelect" style="font-size: 13px; font-weight: 600; color: var(--md-sys-color-outline);">Banco de Dados Inicial:</label>
+                <select id="userWorkspaceSelect" class="filter-select">
+                    <option value="NEW">✨ Criar Banco de Dados Próprio e Exclusivo</option>
+                    {% for ws in all_workspaces %}
+                        <option value="{{ ws.id }}">Vincular ao: {{ ws.name }} ({{ ws.db_identifier }})</option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div style="display: flex; align-items: center; gap: 10px; margin-top: 4px;">
+                <input type="checkbox" id="userIsAdmin" style="width: 18px; height: 18px; accent-color: var(--md-sys-color-primary);">
+                <label for="userIsAdmin" style="font-size: 14px; font-weight: 500; cursor: pointer;">Conceder privilégios de Administrador</label>
+            </div>
+
+            <button type="submit" class="m3-btn m3-btn-primary" style="margin-top: 8px;">Cadastrar Usuário</button>
+        </form>
+    </div>
+
+    <!-- MODAL: NOVO BANCO DE DADOS / ESPAÇO -->
+    <div class="modal-backdrop" id="workspaceModalOverlay"></div>
+    <div class="m3-modal" id="createWorkspaceModal" style="max-width: 460px;">
+        <div class="card-header-bank" style="border-bottom: 1px solid var(--md-sys-color-outline-variant); padding-bottom: 12px; margin-bottom: 16px;">
+            <h3 style="font-weight: 600; display: flex; align-items: center; gap: 8px; margin: 0; font-size: 18px;">
+                <span class="material-symbols-outlined" style="color: var(--md-sys-color-primary);">dns</span>
+                Novo Banco de Dados / Espaço
+            </h3>
+            <button class="close-sidebar-btn" id="closeWorkspaceModalBtn" style="display: flex;" title="Fechar">
+                <span class="material-symbols-outlined">close</span>
+            </button>
+        </div>
+        
+        <form id="createWorkspaceForm" style="display: flex; flex-direction: column; gap: 16px;">
+            <div style="display: flex; flex-direction: column; gap: 6px;">
+                <label for="workspaceName" style="font-size: 13px; font-weight: 600; color: var(--md-sys-color-outline);">Nome do Banco de Dados / Espaço:</label>
+                <input type="text" id="workspaceName" placeholder="Ex: Finanças Dennis, Empresa Beta, Pessoal" required class="filter-select">
+            </div>
+
+            <div style="display: flex; flex-direction: column; gap: 6px;">
+                <label for="workspaceOwner" style="font-size: 13px; font-weight: 600; color: var(--md-sys-color-outline);">Proprietário Inicial:</label>
+                <select id="workspaceOwner" class="filter-select">
+                    {% for u in all_users %}
+                        <option value="{{ u.id }}">{{ u.full_name }} ({{ u.email }})</option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <button type="submit" class="m3-btn m3-btn-primary" style="margin-top: 8px;">Criar Banco de Dados</button>
+        </form>
+    </div>
+
+    <!-- MODAL: VINCULAR USUÁRIO A BANCO DE DADOS -->
+    <div class="modal-backdrop" id="linkModalOverlay"></div>
+    <div class="m3-modal" id="linkUserWorkspaceModal" style="max-width: 460px;">
+        <div class="card-header-bank" style="border-bottom: 1px solid var(--md-sys-color-outline-variant); padding-bottom: 12px; margin-bottom: 16px;">
+            <h3 style="font-weight: 600; display: flex; align-items: center; gap: 8px; margin: 0; font-size: 18px;">
+                <span class="material-symbols-outlined" style="color: var(--md-sys-color-primary);">link</span>
+                Vincular Usuário a Banco de Dados
+            </h3>
+            <button class="close-sidebar-btn" id="closeLinkModalBtn" style="display: flex;" title="Fechar">
+                <span class="material-symbols-outlined">close</span>
+            </button>
+        </div>
+        
+        <form id="linkUserWorkspaceForm" style="display: flex; flex-direction: column; gap: 16px;">
+            <div style="display: flex; flex-direction: column; gap: 6px;">
+                <label for="linkSelectUser" style="font-size: 13px; font-weight: 600; color: var(--md-sys-color-outline);">Selecione o Usuário / Login:</label>
+                <select id="linkSelectUser" required class="filter-select">
+                    {% for u in all_users %}
+                        <option value="{{ u.id }}">{{ u.full_name }} ({{ u.email }})</option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div style="display: flex; flex-direction: column; gap: 6px;">
+                <label for="linkSelectWorkspace" style="font-size: 13px; font-weight: 600; color: var(--md-sys-color-outline);">Selecione o Banco de Dados / Espaço:</label>
+                <select id="linkSelectWorkspace" required class="filter-select">
+                    {% for ws in all_workspaces %}
+                        <option value="{{ ws.id }}">{{ ws.name }} ({{ ws.db_identifier }})</option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div style="display: flex; align-items: center; gap: 10px;">
+                <input type="checkbox" id="linkSetAsActive" checked style="width: 18px; height: 18px; accent-color: var(--md-sys-color-primary);">
+                <label for="linkSetAsActive" style="font-size: 14px; font-weight: 500; cursor: pointer;">Tornar este Banco de Dados ativo imediatamente para o usuário</label>
+            </div>
+
+            <button type="submit" class="m3-btn m3-btn-primary" style="margin-top: 8px;">Confirmar Vínculo</button>
+        </form>
+    </div>
+
+    <!-- MODAL: ADICIONAR CONTA BANCÁRIA A UM BD -->
+    <div class="modal-backdrop" id="accountModalOverlay"></div>
+    <div class="m3-modal" id="addAccountModal" style="max-width: 460px;">
+        <div class="card-header-bank" style="border-bottom: 1px solid var(--md-sys-color-outline-variant); padding-bottom: 12px; margin-bottom: 16px;">
+            <h3 style="font-weight: 600; display: flex; align-items: center; gap: 8px; margin: 0; font-size: 18px;">
+                <span class="material-symbols-outlined" style="color: var(--md-sys-color-primary);">account_balance</span>
+                Adicionar Conta Bancária ao BD
+            </h3>
+            <button class="close-sidebar-btn" id="closeAccountModalBtn" style="display: flex;" title="Fechar">
+                <span class="material-symbols-outlined">close</span>
+            </button>
+        </div>
+        
+        <form id="addAccountForm" style="display: flex; flex-direction: column; gap: 16px;">
+            <input type="hidden" id="targetWorkspaceId">
+            <p id="targetWorkspaceNameDisplay" style="font-size: 13px; color: var(--md-sys-color-primary); font-weight: 600;"></p>
+
+            <div style="display: flex; flex-direction: column; gap: 6px;">
+                <label for="accountBankName" style="font-size: 13px; font-weight: 600; color: var(--md-sys-color-outline);">Nome do Banco:</label>
+                <input type="text" id="accountBankName" placeholder="Ex: Nubank, Banco Inter, Caixa, Itaú, Bradesco" required class="filter-select">
+            </div>
+
+            <div style="display: flex; flex-direction: column; gap: 6px;">
+                <label for="accountInitialBalance" style="font-size: 13px; font-weight: 600; color: var(--md-sys-color-outline);">Saldo Inicial (R$):</label>
+                <input type="number" step="0.01" id="accountInitialBalance" value="0.00" required class="filter-select">
+            </div>
+
+            <button type="submit" class="m3-btn m3-btn-primary" style="margin-top: 8px;">Adicionar Conta Bancária</button>
+        </form>
+    </div>
+
+    <!-- BARRA DE NAVEGAÇÃO INFERIOR MOBILE -->
+    <nav class="mobile-bottom-nav" id="mobileBottomNav">
+        <a href="/dashboard" class="bottom-nav-item" title="Visão Geral">
+            <span class="nav-icon-pill"><span class="material-symbols-outlined">dashboard</span></span>
+            <span class="nav-label">Início</span>
+        </a>
+        <a href="/receitas" class="bottom-nav-item" title="Receitas">
+            <span class="nav-icon-pill"><span class="material-symbols-outlined">trending_up</span></span>
+            <span class="nav-label">Receitas</span>
+        </a>
+        <a href="/custos" class="bottom-nav-item" title="Custos">
+            <span class="nav-icon-pill"><span class="material-symbols-outlined">payments</span></span>
+            <span class="nav-label">Custos</span>
+        </a>
+        <a href="/perfil" class="bottom-nav-item" title="Meu Perfil">
+            <span class="nav-icon-pill"><span class="material-symbols-outlined">person</span></span>
+            <span class="nav-label">Perfil</span>
+        </a>
+        <button type="button" class="bottom-nav-item active" id="bottomNavMenuBtn" title="Mais opções">
+            <span class="nav-icon-pill"><span class="material-symbols-outlined">menu</span></span>
+            <span class="nav-label">Mais</span>
+        </button>
+    </nav>
+
+    <!-- SCRIPT DO PAINEL ADMIN -->
+    <script>
+        document.addEventListener("DOMContentLoaded", () => {
+            setupAdminDrawersAndModals();
+        });
+
+        function setupAdminDrawersAndModals() {
+            // Drawer lateral no mobile
+            const mobileMenuBtn = document.getElementById("mobileMenuBtn");
+            const bottomNavMenuBtn = document.getElementById("bottomNavMenuBtn");
+            const closeSidebarBtn = document.getElementById("closeSidebarBtn");
+            const sidebarOverlay = document.getElementById("sidebarOverlay");
+            const dashboardSidebar = document.getElementById("dashboardSidebar");
+
+            if (dashboardSidebar && sidebarOverlay) {
+                const openSidebar = () => {
+                    dashboardSidebar.classList.add("active");
+                    sidebarOverlay.classList.add("active");
+                    document.body.style.overflow = "hidden";
+                };
+                const closeSidebar = () => {
+                    dashboardSidebar.classList.remove("active");
+                    sidebarOverlay.classList.remove("active");
+                    document.body.style.overflow = "";
+                };
+                if (mobileMenuBtn) mobileMenuBtn.addEventListener("click", openSidebar);
+                if (bottomNavMenuBtn) bottomNavMenuBtn.addEventListener("click", () => {
+                    if (dashboardSidebar.classList.contains("active")) closeSidebar();
+                    else openSidebar();
+                });
+                if (closeSidebarBtn) closeSidebarBtn.addEventListener("click", closeSidebar);
+                sidebarOverlay.addEventListener("click", closeSidebar);
+            }
+
+            // Alternador de tema
+            const setupTheme = (btnId, iconId) => {
+                const btn = document.getElementById(btnId);
+                const icon = document.getElementById(iconId);
+                if (!btn || !icon) return;
+                const update = () => {
+                    const isDark = document.body.classList.contains("dark-mode");
+                    icon.innerText = isDark ? "light_mode" : "dark_mode";
+                    const meta = document.getElementById("themeColorMeta");
+                    if (meta) meta.setAttribute("content", isDark ? "#10141d" : "#f6f8fb");
+                };
+                update();
+                btn.addEventListener("click", () => {
+                    document.body.classList.toggle("dark-mode");
+                    localStorage.setItem("theme", document.body.classList.contains("dark-mode") ? "dark" : "light");
+                    update();
+                });
+            };
+            setupTheme("desktopThemeToggleBtn", "desktopThemeToggleIcon");
+            setupTheme("mobileThemeToggleBtn", "mobileThemeToggleIcon");
+
+            // Modal: Novo Usuário
+            const openUserBtn = document.getElementById("openNewUserModalBtn");
+            const userModal = document.getElementById("createUserModal");
+            const userOverlay = document.getElementById("userModalOverlay");
+            const closeUserBtn = document.getElementById("closeUserModalBtn");
+            if (openUserBtn) {
+                openUserBtn.addEventListener("click", () => {
+                    userModal.classList.add("active");
+                    userOverlay.classList.add("active");
+                });
+            }
+            const closeUser = () => {
+                userModal.classList.remove("active");
+                userOverlay.classList.remove("active");
+            };
+            if (closeUserBtn) closeUserBtn.addEventListener("click", closeUser);
+            if (userOverlay) userOverlay.addEventListener("click", closeUser);
+
+            document.getElementById("createUserForm").addEventListener("submit", async (e) => {
+                e.preventDefault();
+                const formData = new FormData();
+                formData.append("full_name", document.getElementById("userName").value.trim());
+                formData.append("email", document.getElementById("userEmail").value.trim());
+                formData.append("password", document.getElementById("userPassword").value);
+                formData.append("workspace_choice", document.getElementById("userWorkspaceSelect").value);
+                formData.append("is_admin", document.getElementById("userIsAdmin").checked);
+
+                try {
+                    const res = await fetch("/api/admin/users", { method: "POST", body: formData });
+                    const data = await res.json();
+                    if (res.ok) {
+                        alert(data.message || "Usuário cadastrado com sucesso!");
+                        window.location.reload();
+                    } else {
+                        alert("Erro: " + data.detail);
+                    }
+                } catch (err) {
+                    alert("Erro ao comunicar com servidor.");
+                }
+            });
+
+            // Modal: Novo Banco de Dados
+            const openWsBtn = document.getElementById("openNewWorkspaceModalBtn");
+            const wsModal = document.getElementById("createWorkspaceModal");
+            const wsOverlay = document.getElementById("workspaceModalOverlay");
+            const closeWsBtn = document.getElementById("closeWorkspaceModalBtn");
+            if (openWsBtn) {
+                openWsBtn.addEventListener("click", () => {
+                    wsModal.classList.add("active");
+                    wsOverlay.classList.add("active");
+                });
+            }
+            const closeWs = () => {
+                wsModal.classList.remove("active");
+                wsOverlay.classList.remove("active");
+            };
+            if (closeWsBtn) closeWsBtn.addEventListener("click", closeWs);
+            if (wsOverlay) wsOverlay.addEventListener("click", closeWs);
+
+            document.getElementById("createWorkspaceForm").addEventListener("submit", async (e) => {
+                e.preventDefault();
+                const formData = new FormData();
+                formData.append("name", document.getElementById("workspaceName").value.trim());
+                formData.append("owner_id", document.getElementById("workspaceOwner").value);
+
+                try {
+                    const res = await fetch("/api/admin/workspaces", { method: "POST", body: formData });
+                    const data = await res.json();
+                    if (res.ok) {
+                        alert(data.message || "Banco de Dados criado com sucesso!");
+                        window.location.reload();
+                    } else {
+                        alert("Erro: " + data.detail);
+                    }
+                } catch (err) {
+                    alert("Erro ao comunicar com servidor.");
+                }
+            });
+
+            // Modal: Vincular
+            const linkModal = document.getElementById("linkUserWorkspaceModal");
+            const linkOverlay = document.getElementById("linkModalOverlay");
+            const closeLinkBtn = document.getElementById("closeLinkModalBtn");
+            const closeLink = () => {
+                linkModal.classList.remove("active");
+                linkOverlay.classList.remove("active");
+            };
+            if (closeLinkBtn) closeLinkBtn.addEventListener("click", closeLink);
+            if (linkOverlay) linkOverlay.addEventListener("click", closeLink);
+
+            document.getElementById("linkUserWorkspaceForm").addEventListener("submit", async (e) => {
+                e.preventDefault();
+                const formData = new FormData();
+                formData.append("user_id", document.getElementById("linkSelectUser").value);
+                formData.append("workspace_id", document.getElementById("linkSelectWorkspace").value);
+                formData.append("set_as_active", document.getElementById("linkSetAsActive").checked);
+
+                try {
+                    const res = await fetch("/api/admin/link-user-workspace", { method: "POST", body: formData });
+                    const data = await res.json();
+                    if (res.ok) {
+                        alert(data.message || "Vínculo realizado com sucesso!");
+                        window.location.reload();
+                    } else {
+                        alert("Erro: " + data.detail);
+                    }
+                } catch (err) {
+                    alert("Erro ao comunicar com servidor.");
+                }
+            });
+
+            // Modal: Adicionar Conta Bancária
+            const accModal = document.getElementById("addAccountModal");
+            const accOverlay = document.getElementById("accountModalOverlay");
+            const closeAccBtn = document.getElementById("closeAccountModalBtn");
+            const closeAcc = () => {
+                accModal.classList.remove("active");
+                accOverlay.classList.remove("active");
+            };
+            if (closeAccBtn) closeAccBtn.addEventListener("click", closeAcc);
+            if (accOverlay) accOverlay.addEventListener("click", closeAcc);
+
+            document.getElementById("addAccountForm").addEventListener("submit", async (e) => {
+                e.preventDefault();
+                const wsId = document.getElementById("targetWorkspaceId").value;
+                const formData = new FormData();
+                formData.append("bank_name", document.getElementById("accountBankName").value.trim());
+                formData.append("initial_balance", document.getElementById("accountInitialBalance").value);
+
+                try {
+                    const res = await fetch(`/api/admin/workspaces/${wsId}/accounts`, { method: "POST", body: formData });
+                    const data = await res.json();
+                    if (res.ok) {
+                        alert(data.message || "Conta bancária adicionada com sucesso!");
+                        window.location.reload();
+                    } else {
+                        alert("Erro: " + data.detail);
+                    }
+                } catch (err) {
+                    alert("Erro ao comunicar com servidor.");
+                }
+            });
+        }
+
+        // Funções Globais chamadas inline
+        function openLinkModalForUser(userId, userName) {
+            const selectUser = document.getElementById("linkSelectUser");
+            if (selectUser) selectUser.value = userId;
+            const modal = document.getElementById("linkUserWorkspaceModal");
+            const overlay = document.getElementById("linkModalOverlay");
+            if (modal && overlay) {
+                modal.classList.add("active");
+                overlay.classList.add("active");
+            }
+        }
+
+        function openLinkModalForWorkspace(wsId, wsName) {
+            const selectWs = document.getElementById("linkSelectWorkspace");
+            if (selectWs) selectWs.value = wsId;
+            const modal = document.getElementById("linkUserWorkspaceModal");
+            const overlay = document.getElementById("linkModalOverlay");
+            if (modal && overlay) {
+                modal.classList.add("active");
+                overlay.classList.add("active");
+            }
+        }
+
+        function openAddAccountModal(wsId, wsName) {
+            document.getElementById("targetWorkspaceId").value = wsId;
+            document.getElementById("targetWorkspaceNameDisplay").innerText = `Banco de Dados: ${wsName}`;
+            const modal = document.getElementById("addAccountModal");
+            const overlay = document.getElementById("accountModalOverlay");
+            if (modal && overlay) {
+                modal.classList.add("active");
+                overlay.classList.add("active");
+            }
+        }
+
+        async function unlinkUserWorkspace(userId, wsId) {
+            if (!confirm("Tem certeza que deseja desvincular este usuário deste Banco de Dados?")) return;
+            const formData = new FormData();
+            formData.append("user_id", userId);
+            formData.append("workspace_id", wsId);
+            try {
+                const res = await fetch("/api/admin/unlink-user-workspace", { method: "POST", body: formData });
+                const data = await res.json();
+                if (res.ok) {
+                    alert(data.message || "Vínculo removido com sucesso!");
+                    window.location.reload();
+                } else {
+                    alert("Erro: " + data.detail);
+                }
+            } catch (err) {
+                alert("Erro ao remover vínculo.");
+            }
+        }
+
+        async function toggleAdminStatus(userId) {
+            if (!confirm("Deseja alterar o privilégio de Administrador deste usuário?")) return;
+            try {
+                const res = await fetch(`/api/admin/users/${userId}/toggle-admin`, { method: "POST" });
+                const data = await res.json();
+                if (res.ok) {
+                    alert(data.message || "Privilégio atualizado!");
+                    window.location.reload();
+                } else {
+                    alert("Erro: " + data.detail);
+                }
+            } catch (err) {
+                alert("Erro ao alterar privilégio.");
+            }
+        }
+    </script>
+</body>
+</html>

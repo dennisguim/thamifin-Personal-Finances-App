@@ -101,6 +101,20 @@
                                 Categorias
                             </a>
                         </li>
+                        <li class="nav-item {% if active_page == 'perfil' %}active{% endif %}">
+                            <a href="/perfil">
+                                <span class="material-symbols-outlined">person</span>
+                                Meu Perfil
+                            </a>
+                        </li>
+                        {% if user and user.is_admin %}
+                        <li class="nav-item {% if active_page == 'admin' %}active{% endif %}">
+                            <a href="/admin" style="color: var(--md-sys-color-primary);">
+                                <span class="material-symbols-outlined">admin_panel_settings</span>
+                                Painel Admin
+                            </a>
+                        </li>
+                        {% endif %}
                     </ul>
                 </nav>
             </div>
@@ -112,16 +126,16 @@
                         <span class="material-symbols-outlined" id="desktopThemeToggleIcon">dark_mode</span>
                     </button>
                 </div>
-                <div class="user-badge">
+                <a href="/perfil" class="user-badge" style="text-decoration: none; color: inherit;" title="Ver meu perfil">
                     <span class="material-symbols-outlined" style="font-size: 32px; color: var(--md-sys-color-primary);">account_circle</span>
                     <div class="user-info" style="flex-grow: 1;">
-                        <h4 id="userNameDisplay">Carregando...</h4>
-                        <p>Carteira Pessoal</p>
+                        <h4 id="userNameDisplay">{{ user.full_name if user else 'Carregando...' }}</h4>
+                        <p>{{ workspace.name if workspace else 'Espaço Pessoal' }}</p>
                     </div>
                     <a href="/auth/logout" style="color: var(--md-sys-color-error); display: flex;" title="Sair">
                         <span class="material-symbols-outlined">logout</span>
                     </a>
-                </div>
+                </a>
             </div>
         </aside>
         

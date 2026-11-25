@@ -14,7 +14,6 @@
 </head>
 <body>
     <script>
-        // Inicializa o tema imediatamente para evitar flashes de cor
         const savedTheme = localStorage.getItem("theme");
         const systemPrefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
         const isDark = savedTheme === "dark" || (!savedTheme && systemPrefersDark);
@@ -24,54 +23,300 @@
         const metaTheme = document.getElementById("themeColorMeta");
         if (metaTheme) metaTheme.setAttribute("content", isDark ? "#10141d" : "#f6f8fb");
     </script>
+
     <div class="login-container">
-        <!-- CARD DE AUTENTICAÇÃO M3 -->
+        <!-- CARD DE AUTENTICAÇÃO LIQUID GLASS -->
         <div class="login-card" id="authCard">
             <div class="brand-header">
                 <button class="theme-toggle-btn" id="themeToggleBtn" type="button" style="position: absolute; right: 0; top: 0;" title="Alternar tema">
                     <span class="material-symbols-outlined" id="themeToggleIcon">dark_mode</span>
                 </button>
                 <img src="/static/thami-logo.png" alt="ThamiFin Logo" class="login-logo">
-                <p id="authSubtitle" style="margin-top: 8px;">Acesse sua carteira pessoal consolidada</p>
+                <p id="authSubtitle" style="margin-top: 6px;">Plataforma de Gestão Financeira Pessoal</p>
+            </div>
+
+            <!-- CONTROLE SEGMENTADO: ENTRAR / CRIAR CONTA -->
+            <div class="segmented-control" style="width: 100%;">
+                <button type="button" class="segmented-btn active" id="tabLoginBtn" style="flex: 1; justify-content: center; min-height: 42px;">
+                    <span class="material-symbols-outlined" style="font-size: 18px;">login</span>
+                    Entrar
+                </button>
+                <button type="button" class="segmented-btn" id="tabRegisterBtn" style="flex: 1; justify-content: center; min-height: 42px;">
+                    <span class="material-symbols-outlined" style="font-size: 18px;">person_add</span>
+                    Criar Acesso
+                </button>
             </div>
 
             <!-- Feedbacks Dinâmicos das APIs -->
             <div id="alertBox"></div>
 
-            <!-- FORMULÁRIO DE LOGIN -->
-            <form action="/auth/login" method="POST" id="loginForm">
-                <div style="display: flex; flex-direction: column; gap: 16px;">
-                    <div class="m3-text-field">
-                        <input type="text" name="email" id="loginEmail" placeholder=" " required>
-                        <label for="loginEmail">Usuário</label>
-                    </div>
-                    
-                    <div class="m3-text-field">
-                        <input type="password" name="password" id="loginPassword" placeholder=" " required>
-                        <label for="loginPassword">Senha</label>
-                    </div>
+            <!-- 1. FORMULÁRIO DE LOGIN -->
+            <div id="loginView">
+                <form action="/auth/login" method="POST" id="loginForm">
+                    <div style="display: flex; flex-direction: column; gap: 16px;">
+                        <div class="m3-text-field">
+                            <input type="text" name="email" id="loginEmail" placeholder=" " required>
+                            <label for="loginEmail">Email / Usuário</label>
+                        </div>
+                        
+                        <div class="m3-text-field">
+                            <input type="password" name="password" id="loginPassword" placeholder=" " required>
+                            <label for="loginPassword">Senha</label>
+                        </div>
 
-                    <button type="submit" class="m3-btn m3-btn-primary" style="margin-top: 12px;">
-                        <span class="material-symbols-outlined">login</span>
-                        Entrar no Dashboard
+                        <button type="submit" class="m3-btn m3-btn-primary" style="margin-top: 10px;">
+                            <span class="material-symbols-outlined">login</span>
+                            Entrar no Dashboard
+                        </button>
+                    </div>
+                </form>
+
+                <div style="text-align: center; margin-top: 18px;">
+                    <button type="button" id="linkToRegister" class="m3-btn-text" style="font-size: 13.5px; cursor: pointer; border: none; background: none;">
+                        Não tem uma conta? <b>Solicitar criação de acesso</b>
                     </button>
                 </div>
-            </form>
+            </div>
+
+            <!-- 2. FORMULÁRIO DE CADASTRO: ETAPA 1 (DADOS + ENVIO DE CÓDIGO) -->
+            <div id="registerStep1View" style="display: none;">
+                <!-- Aviso de segurança sobre drinaldim@gmail.com -->
+                <div style="display: flex; align-items: flex-start; gap: 10px; padding: 12px 14px; background: rgba(72, 185, 199, 0.12); border: 1px solid rgba(72, 185, 199, 0.25); border-radius: var(--radius-md); font-size: 13px; color: var(--md-sys-color-primary); line-height: 1.4; margin-bottom: 4px;">
+                    <span class="material-symbols-outlined" style="font-size: 22px; flex-shrink: 0; margin-top: 1px;">mark_email_read</span>
+                    <div>
+                        Por segurança, um código de confirmação será enviado para <b>drinaldim@gmail.com</b> para autorizar a criação da conta.
+                    </div>
+                </div>
+
+                <form id="requestCodeForm" style="display: flex; flex-direction: column; gap: 14px;">
+                    <div class="m3-text-field">
+                        <input type="text" id="regFullName" placeholder=" " required>
+                        <label for="regFullName">Nome Completo</label>
+                    </div>
+
+                    <div class="m3-text-field">
+                        <input type="email" id="regEmail" placeholder=" " required>
+                        <label for="regEmail">Seu Email / Login Desejado</label>
+                    </div>
+
+                    <div class="m3-text-field">
+                        <input type="password" id="regPassword" placeholder=" " required minlength="6">
+                        <label for="regPassword">Senha Desejada (mín. 6 caracteres)</label>
+                    </div>
+
+                    <button type="submit" class="m3-btn m3-btn-primary" id="sendCodeBtn" style="margin-top: 10px;">
+                        <span class="material-symbols-outlined">send</span>
+                        Enviar Código de Confirmação
+                    </button>
+                </form>
+
+                <div style="text-align: center; margin-top: 16px;">
+                    <button type="button" id="linkToLogin1" class="m3-btn-text" style="font-size: 13.5px; cursor: pointer; border: none; background: none;">
+                        Já tem conta? <b>Fazer login</b>
+                    </button>
+                </div>
+            </div>
+
+            <!-- 3. FORMULÁRIO DE CADASTRO: ETAPA 2 (DIGITAÇÃO DO CÓDIGO) -->
+            <div id="registerStep2View" style="display: none;">
+                <div style="display: flex; align-items: flex-start; gap: 10px; padding: 12px 14px; background: rgba(0, 135, 78, 0.12); border: 1px solid rgba(0, 135, 78, 0.25); border-radius: var(--radius-md); font-size: 13px; color: var(--md-sys-color-income); line-height: 1.4; margin-bottom: 4px;">
+                    <span class="material-symbols-outlined" style="font-size: 22px; flex-shrink: 0; margin-top: 1px;">verified_user</span>
+                    <div>
+                        Código de confirmação enviado para <b>drinaldim@gmail.com</b>. Solicite o código ao administrador e digite abaixo:
+                    </div>
+                </div>
+
+                <form id="verifyCodeForm" style="display: flex; flex-direction: column; gap: 16px;">
+                    <div style="display: flex; flex-direction: column; gap: 6px;">
+                        <label for="confirmCode" style="font-size: 13px; font-weight: 600; color: var(--md-sys-color-outline); text-align: center;">
+                            Código de 6 Dígitos:
+                        </label>
+                        <input type="text" id="confirmCode" placeholder="000000" maxlength="6" required class="filter-select" style="text-align: center; font-size: 28px; font-weight: 700; letter-spacing: 8px; padding: 12px 16px; border-radius: var(--radius-md); height: 60px;">
+                    </div>
+
+                    <button type="submit" class="m3-btn m3-btn-primary" id="confirmCodeBtn" style="margin-top: 6px;">
+                        <span class="material-symbols-outlined">check_circle</span>
+                        Validar Código & Criar Conta
+                    </button>
+                </form>
+
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 14px; font-size: 13px;">
+                    <button type="button" id="resendCodeBtn" class="m3-btn-text" style="padding: 4px 8px; font-size: 12.5px; border: none; cursor: pointer;">
+                        Reenviar código
+                    </button>
+                    <button type="button" id="backToStep1Btn" class="m3-btn-text" style="padding: 4px 8px; font-size: 12.5px; border: none; cursor: pointer; color: var(--md-sys-color-outline);">
+                        Alterar dados
+                    </button>
+                </div>
+            </div>
+
         </div>
     </div>
 
     <script>
-        const loginForm = document.getElementById("loginForm");
-        const subtitle = document.getElementById("authSubtitle");
+        // Elementos do DOM
+        const tabLoginBtn = document.getElementById("tabLoginBtn");
+        const tabRegisterBtn = document.getElementById("tabRegisterBtn");
+        const loginView = document.getElementById("loginView");
+        const registerStep1View = document.getElementById("registerStep1View");
+        const registerStep2View = document.getElementById("registerStep2View");
         const alertBox = document.getElementById("alertBox");
 
-        // Trata alertas enviados via parâmetros URL pelo backend
-        const urlParams = new URLSearchParams(window.location.search);
-        if (urlParams.has('error')) {
-            alertBox.innerHTML = `<div class="alert-message alert-error">Credenciais incorretas. Tente novamente.</div>`;
+        const linkToRegister = document.getElementById("linkToRegister");
+        const linkToLogin1 = document.getElementById("linkToLogin1");
+        const backToStep1Btn = document.getElementById("backToStep1Btn");
+        const resendCodeBtn = document.getElementById("resendCodeBtn");
+
+        let pendingEmail = "";
+
+        // Alternância de Abas
+        function showLogin() {
+            tabLoginBtn.classList.add("active");
+            tabRegisterBtn.classList.remove("active");
+            loginView.style.display = "block";
+            registerStep1View.style.display = "none";
+            registerStep2View.style.display = "none";
+            alertBox.innerHTML = "";
         }
 
-        // Lógica de alternância de tema Claro/Escuro
+        function showRegisterStep1() {
+            tabRegisterBtn.classList.add("active");
+            tabLoginBtn.classList.remove("active");
+            loginView.style.display = "none";
+            registerStep1View.style.display = "block";
+            registerStep2View.style.display = "none";
+            alertBox.innerHTML = "";
+        }
+
+        function showRegisterStep2(email) {
+            tabRegisterBtn.classList.add("active");
+            tabLoginBtn.classList.remove("active");
+            loginView.style.display = "none";
+            registerStep1View.style.display = "none";
+            registerStep2View.style.display = "block";
+            pendingEmail = email;
+            document.getElementById("confirmCode").value = "";
+            document.getElementById("confirmCode").focus();
+        }
+
+        tabLoginBtn.addEventListener("click", showLogin);
+        tabRegisterBtn.addEventListener("click", showRegisterStep1);
+        if (linkToRegister) linkToRegister.addEventListener("click", showRegisterStep1);
+        if (linkToLogin1) linkToLogin1.addEventListener("click", showLogin);
+        if (backToStep1Btn) backToStep1Btn.addEventListener("click", showRegisterStep1);
+
+        // Feedback de URL
+        const urlParams = new URLSearchParams(window.location.search);
+        if (urlParams.has('error')) {
+            alertBox.innerHTML = `<div class="alert-message alert-error">Credenciais incorretas ou acesso não autorizado.</div>`;
+        }
+        if (urlParams.get('mode') === 'register' || window.location.pathname === '/register') {
+            showRegisterStep1();
+        }
+
+        // Submissão da Etapa 1 (Solicitação de Código)
+        document.getElementById("requestCodeForm").addEventListener("submit", async (e) => {
+            e.preventDefault();
+            const fullName = document.getElementById("regFullName").value.trim();
+            const email = document.getElementById("regEmail").value.trim();
+            const password = document.getElementById("regPassword").value;
+            const sendBtn = document.getElementById("sendCodeBtn");
+
+            sendBtn.disabled = true;
+            sendBtn.innerHTML = `<span class="material-symbols-outlined" style="animation: spin 1s linear infinite;">sync</span> Enviando código...`;
+            alertBox.innerHTML = "";
+
+            const formData = new FormData();
+            formData.append("full_name", fullName);
+            formData.append("email", email);
+            formData.append("password", password);
+
+            try {
+                const res = await fetch("/api/auth/request-code", { method: "POST", body: formData });
+                const data = await res.json();
+
+                if (res.ok) {
+                    showRegisterStep2(email);
+                    alertBox.innerHTML = `<div class="alert-message alert-success">${data.message}</div>`;
+                } else {
+                    alertBox.innerHTML = `<div class="alert-message alert-error">${data.detail || "Erro ao solicitar código."}</div>`;
+                }
+            } catch (err) {
+                alertBox.innerHTML = `<div class="alert-message alert-error">Falha ao conectar com o servidor. Tente novamente.</div>`;
+            } finally {
+                sendBtn.disabled = false;
+                sendBtn.innerHTML = `<span class="material-symbols-outlined">send</span> Enviar Código de Confirmação`;
+            }
+        });
+
+        // Reenviar código
+        if (resendCodeBtn) {
+            resendCodeBtn.addEventListener("click", async () => {
+                const fullName = document.getElementById("regFullName").value.trim();
+                const password = document.getElementById("regPassword").value;
+                if (!pendingEmail) {
+                    showRegisterStep1();
+                    return;
+                }
+                const formData = new FormData();
+                formData.append("full_name", fullName || "Usuário");
+                formData.append("email", pendingEmail);
+                formData.append("password", password || "123456");
+
+                try {
+                    const res = await fetch("/api/auth/request-code", { method: "POST", body: formData });
+                    const data = await res.json();
+                    if (res.ok) {
+                        alertBox.innerHTML = `<div class="alert-message alert-success">Novo código enviado para drinaldim@gmail.com!</div>`;
+                    } else {
+                        alertBox.innerHTML = `<div class="alert-message alert-error">${data.detail}</div>`;
+                    }
+                } catch (err) {
+                    alertBox.innerHTML = `<div class="alert-message alert-error">Erro ao reenviar.</div>`;
+                }
+            });
+        }
+
+        // Submissão da Etapa 2 (Validação do Código)
+        document.getElementById("verifyCodeForm").addEventListener("submit", async (e) => {
+            e.preventDefault();
+            const code = document.getElementById("confirmCode").value.trim();
+            const confirmBtn = document.getElementById("confirmCodeBtn");
+
+            if (!pendingEmail) {
+                alertBox.innerHTML = `<div class="alert-message alert-error">Sessão de cadastro perdida. Inicie novamente.</div>`;
+                showRegisterStep1();
+                return;
+            }
+
+            confirmBtn.disabled = true;
+            confirmBtn.innerHTML = `<span class="material-symbols-outlined" style="animation: spin 1s linear infinite;">sync</span> Validando...`;
+            alertBox.innerHTML = "";
+
+            const formData = new FormData();
+            formData.append("email", pendingEmail);
+            formData.append("code", code);
+
+            try {
+                const res = await fetch("/api/auth/verify-code", { method: "POST", body: formData });
+                if (res.ok) {
+                    alertBox.innerHTML = `<div class="alert-message alert-success">Código confirmado! Criando seu banco de dados e acessando...</div>`;
+                    setTimeout(() => {
+                        window.location.href = "/dashboard";
+                    }, 1000);
+                } else {
+                    const data = await res.json();
+                    alertBox.innerHTML = `<div class="alert-message alert-error">${data.detail || "Código incorreto."}</div>`;
+                }
+            } catch (err) {
+                alertBox.innerHTML = `<div class="alert-message alert-error">Falha ao validar código. Tente novamente.</div>`;
+            } finally {
+                confirmBtn.disabled = false;
+                confirmBtn.innerHTML = `<span class="material-symbols-outlined">check_circle</span> Validar Código & Criar Conta`;
+            }
+        });
+
+        // Alternância de Tema
         const themeToggleBtn = document.getElementById("themeToggleBtn");
         const themeToggleIcon = document.getElementById("themeToggleIcon");
 
@@ -82,13 +327,14 @@
                 themeToggleIcon.innerText = "dark_mode";
             }
         }
-
         updateToggleIcon();
 
         themeToggleBtn.addEventListener("click", () => {
             document.body.classList.toggle("dark-mode");
             const isDark = document.body.classList.contains("dark-mode");
             localStorage.setItem("theme", isDark ? "dark" : "light");
+            const meta = document.getElementById("themeColorMeta");
+            if (meta) meta.setAttribute("content", isDark ? "#10141d" : "#f6f8fb");
             updateToggleIcon();
         });
     </script>

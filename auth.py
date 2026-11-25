@@ -13,7 +13,7 @@ from database import get_db, User
 load_dotenv()
 
 # Configurações de Segurança do JWT
-SECRET_KEY = os.getenv("SECRET_KEY", "fallback_secret_for_dev_only")
+SECRET_KEY = os.getenv("SECRET_KEY", "thamifin_super_secret_platform_key_production_2026_dev")
 ALGORITHM = "HS256"
 ACCESS_TOKEN_EXPIRE_MINUTES = 1440  # Duração da sessão: 1 dia (24 horas)
 
@@ -74,4 +74,13 @@ def get_current_user(request: Request, db: Session = Depends(get_db)) -> User:
     if user is None:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Usuário não encontrado")
         
+    return user
+
+def get_current_admin(user: User = Depends(get_current_user)) -> User:
+    """Verifica se o usuário autenticado possui privilégio de administrador."""
+    if not user.is_admin:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Acesso restrito a administradores da plataforma.",
+        )
     return user

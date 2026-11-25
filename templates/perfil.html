@@ -1,0 +1,468 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="theme-color" content="#f6f8fb" id="themeColorMeta">
+    <title>Meu Perfil - ThamiFin</title>
+    <!-- Google Fonts & Material Symbols -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0" rel="stylesheet">
+    <link rel="stylesheet" href="/static/css/style.css">
+</head>
+<body>
+    <script>
+        const savedTheme = localStorage.getItem("theme");
+        const systemPrefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
+        const isDark = savedTheme === "dark" || (!savedTheme && systemPrefersDark);
+        if (isDark) {
+            document.body.classList.add("dark-mode");
+        }
+        const metaTheme = document.getElementById("themeColorMeta");
+        if (metaTheme) metaTheme.setAttribute("content", isDark ? "#10141d" : "#f6f8fb");
+    </script>
+
+    <!-- OVERLAY DE BACKDROP DA SIDEBAR MOBILE -->
+    <div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+    <!-- CABEÇALHO DO MOBILE -->
+    <header class="mobile-header">
+        <button class="hamburger-btn" id="mobileMenuBtn" title="Menu lateral">
+            <span class="material-symbols-outlined">menu</span>
+        </button>
+        <div class="mobile-brand">
+            <img src="/static/thami-logo.png" alt="ThamiFin Logo" class="mobile-logo">
+            <span>ThamiFin</span>
+        </div>
+        <button class="theme-toggle-btn" id="mobileThemeToggleBtn" title="Alternar tema">
+            <span class="material-symbols-outlined" id="mobileThemeToggleIcon">dark_mode</span>
+        </button>
+    </header>
+
+    <div class="dashboard-layout">
+        
+        <!-- SIDEBAR DE NAVEGAÇÃO LATERAL -->
+        <aside class="m3-sidebar" id="dashboardSidebar">
+            <div class="sidebar-top">
+                <div class="logo-section">
+                    <h2>
+                        <img src="/static/thami-logo.png" alt="ThamiFin Logo" class="sidebar-logo">
+                        ThamiFin
+                    </h2>
+                    <button class="close-sidebar-btn" id="closeSidebarBtn" title="Fechar menu">
+                        <span class="material-symbols-outlined">close</span>
+                    </button>
+                </div>
+                
+                <nav>
+                    <ul class="nav-links">
+                        <li class="nav-item">
+                            <a href="/dashboard">
+                                <span class="material-symbols-outlined">dashboard</span>
+                                Visão Geral
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a href="/receitas">
+                                <span class="material-symbols-outlined">trending_up</span>
+                                Receitas
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a href="/custos">
+                                <span class="material-symbols-outlined">payments</span>
+                                Custos Fixos / Variáveis
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a href="/parcelamentos">
+                                <span class="material-symbols-outlined">credit_card</span>
+                                Parcelamentos
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a href="/graficos">
+                                <span class="material-symbols-outlined">bar_chart</span>
+                                Gráficos
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a href="/metas">
+                                <span class="material-symbols-outlined">flag</span>
+                                Planejador / Metas
+                            </a>
+                        </li>
+                        <li class="nav-item active">
+                            <a href="/perfil">
+                                <span class="material-symbols-outlined">person</span>
+                                Meu Perfil
+                            </a>
+                        </li>
+                        {% if user.is_admin %}
+                        <li class="nav-item">
+                            <a href="/admin" style="color: var(--md-sys-color-primary);">
+                                <span class="material-symbols-outlined">admin_panel_settings</span>
+                                Painel Admin
+                            </a>
+                        </li>
+                        {% endif %}
+                    </ul>
+                </nav>
+            </div>
+            
+            <div class="sidebar-bottom" style="display: flex; flex-direction: column; gap: 16px;">
+                <div style="display: flex; justify-content: flex-end; padding-right: 8px;">
+                    <button class="theme-toggle-btn" id="desktopThemeToggleBtn" title="Alternar tema claro/escuro">
+                        <span class="material-symbols-outlined" id="desktopThemeToggleIcon">dark_mode</span>
+                    </button>
+                </div>
+
+                <a href="/perfil" class="user-badge" style="text-decoration: none; color: inherit;" title="Ver meu perfil">
+                    <span class="material-symbols-outlined" style="font-size: 32px; color: var(--md-sys-color-primary);">account_circle</span>
+                    <div class="user-info" style="flex-grow: 1;">
+                        <h4>{{ user.full_name }}</h4>
+                        <p>{{ workspace.name }}</p>
+                    </div>
+                    <a href="/auth/logout" style="color: var(--md-sys-color-error); display: flex;" title="Sair">
+                        <span class="material-symbols-outlined">logout</span>
+                    </a>
+                </a>
+            </div>
+        </aside>
+
+        <!-- CONTEÚDO PRINCIPAL DO PERFIL -->
+        <main class="m3-main-content">
+            
+            <header class="header-dashboard">
+                <div class="header-title">
+                    <div style="display: flex; align-items: center; gap: 10px;">
+                        <span class="material-symbols-outlined" style="color: var(--md-sys-color-primary); font-size: 32px;">badge</span>
+                        <h1>Meu Perfil & Acessos</h1>
+                    </div>
+                    <p>Gerencie sua conta e compartilhe o acesso ao seu banco de dados com outros logins</p>
+                </div>
+            </header>
+
+            <div class="finance-grid" style="grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));">
+                
+                <!-- CARD 1: DADOS DA MINHA CONTA -->
+                <div class="m3-card">
+                    <div class="card-header-bank">
+                        <h3 style="display: flex; align-items: center; gap: 8px;">
+                            <span class="material-symbols-outlined" style="color: var(--md-sys-color-primary);">person</span>
+                            Minha Conta
+                        </h3>
+                        {% if user.is_admin %}
+                            <span style="background: var(--md-sys-color-primary-container); color: var(--md-sys-color-primary); font-size: 11px; font-weight: 700; padding: 3px 10px; border-radius: var(--radius-full);">
+                                ADMIN
+                            </span>
+                        {% endif %}
+                    </div>
+
+                    <div style="display: flex; flex-direction: column; gap: 12px; margin-top: 4px;">
+                        <div>
+                            <span style="font-size: 12px; color: var(--md-sys-color-outline); font-weight: 600; text-transform: uppercase;">Nome Completo</span>
+                            <div style="font-size: 17px; font-weight: 600; color: var(--md-sys-color-on-surface);">{{ user.full_name }}</div>
+                        </div>
+
+                        <div>
+                            <span style="font-size: 12px; color: var(--md-sys-color-outline); font-weight: 600; text-transform: uppercase;">Email / Login</span>
+                            <div style="font-size: 15px; font-weight: 500; color: var(--md-sys-color-on-surface);">{{ user.email }}</div>
+                        </div>
+
+                        <div>
+                            <span style="font-size: 12px; color: var(--md-sys-color-outline); font-weight: 600; text-transform: uppercase;">Membro Desde</span>
+                            <div style="font-size: 14px; color: var(--md-sys-color-outline);">
+                                {{ user.created_at.strftime("%d/%m/%Y") if user.created_at else "Conta ativa" }}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- CARD 2: MEU BANCO DE DADOS / ESPAÇO ATIVO -->
+                <div class="m3-card">
+                    <div class="card-header-bank">
+                        <h3 style="display: flex; align-items: center; gap: 8px;">
+                            <span class="material-symbols-outlined" style="color: var(--md-sys-color-secondary);">database</span>
+                            Meu Banco de Dados Ativo
+                        </h3>
+                        <code style="background: var(--glass-input-bg); padding: 3px 8px; border-radius: var(--radius-xs); font-size: 11.5px;">{{ workspace.db_identifier }}</code>
+                    </div>
+
+                    <div style="display: flex; flex-direction: column; gap: 14px;">
+                        <div>
+                            <span style="font-size: 12px; color: var(--md-sys-color-outline); font-weight: 600; text-transform: uppercase;">Nome do Espaço</span>
+                            <div style="font-size: 18px; font-weight: 700; color: var(--md-sys-color-primary);">{{ workspace.name }}</div>
+                        </div>
+
+                        {% if all_user_workspaces|length > 1 %}
+                        <div style="padding-top: 8px; border-top: 1px solid var(--md-sys-color-outline-variant);">
+                            <label for="switchWorkspaceSelect" style="font-size: 12.5px; font-weight: 600; color: var(--md-sys-color-outline); display: block; margin-bottom: 6px;">
+                                Alternar Banco de Dados Ativo:
+                            </label>
+                            <div style="display: flex; gap: 8px;">
+                                <select id="switchWorkspaceSelect" class="filter-select" style="flex: 1; min-height: 40px; padding: 8px 14px;">
+                                    {% for m in all_user_workspaces %}
+                                        <option value="{{ m.workspace_id }}" {% if m.workspace_id == workspace.id %}selected{% endif %}>
+                                            {{ m.workspace.name }} ({{ m.workspace.db_identifier }})
+                                        </option>
+                                    {% endfor %}
+                                </select>
+                                <button onclick="switchWorkspace()" class="m3-btn m3-btn-primary" style="width: auto; min-height: 40px; padding: 8px 16px; font-size: 13px;">
+                                    Trocar
+                                </button>
+                            </div>
+                        </div>
+                        {% endif %}
+
+                        <div>
+                            <span style="font-size: 12px; color: var(--md-sys-color-outline); font-weight: 600; text-transform: uppercase; margin-bottom: 6px; display: block;">Contas Bancárias Conectadas</span>
+                            <div style="display: flex; flex-wrap: wrap; gap: 8px;">
+                                {% for acc in workspace_accounts %}
+                                    <span class="badge-bank badge-bank-{% if 'nubank' in acc.bank_name.lower() %}nubank{% elif 'inter' in acc.bank_name.lower() %}inter{% elif 'caixa' in acc.bank_name.lower() %}caixa{% else %}default{% endif %}">
+                                        {{ acc.bank_name }}: R$ {{ '%.2f'|format(acc.balance) }}
+                                    </span>
+                                {% else %}
+                                    <span style="font-size: 13px; color: var(--md-sys-color-outline);">Nenhuma conta cadastrada</span>
+                                {% endfor %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- SEÇÃO: COMPARTILHAMENTO DE ACESSO AO BANCO DE DADOS -->
+            <section class="transactions-section">
+                <div class="section-header">
+                    <div>
+                        <h3 style="font-size: 18px; font-weight: 700; display: flex; align-items: center; gap: 8px;">
+                            <span class="material-symbols-outlined" style="color: var(--md-sys-color-primary);">group_add</span>
+                            Compartilhar Acesso ao meu Banco de Dados
+                        </h3>
+                        <p style="font-size: 13px; color: var(--md-sys-color-outline);">
+                            Adicione outras contas de usuário (ex: cônjuge, sócio, família) para terem acesso completo a este espaço com suas contas bancárias
+                        </p>
+                    </div>
+                </div>
+
+                <!-- Formulário para adicionar conta -->
+                <div class="filters-bar" style="margin-bottom: 8px;">
+                    <form id="addAccessForm" style="display: flex; width: 100%; gap: 12px; align-items: flex-end; flex-wrap: wrap;">
+                        <div style="flex: 1; min-width: 260px; display: flex; flex-direction: column; gap: 6px;">
+                            <label for="inviteEmail" style="font-size: 13px; font-weight: 600; color: var(--md-sys-color-outline);">
+                                Email da Conta a ser adicionada:
+                            </label>
+                            <input type="email" id="inviteEmail" placeholder="ex: thami@exemplo.com" required class="filter-select" style="min-height: 46px;">
+                        </div>
+
+                        <button type="submit" class="m3-btn m3-btn-primary" style="width: auto; min-height: 46px; padding: 10px 24px;">
+                            <span class="material-symbols-outlined">add_circle</span>
+                            Conceder Acesso
+                        </button>
+                    </form>
+                </div>
+
+                <!-- Tabela de membros com acesso -->
+                <div class="tx-table-container">
+                    <table class="tx-table">
+                        <thead>
+                            <tr>
+                                <th>Nome do Usuário</th>
+                                <th>Email</th>
+                                <th>Papel no Espaço</th>
+                                <th>Data de Acesso</th>
+                                <th style="text-align: right;">Ação</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for m in workspace_members %}
+                            <tr class="tx-row">
+                                <td style="font-weight: 600;">
+                                    <div style="display: flex; align-items: center; gap: 8px;">
+                                        <span class="material-symbols-outlined" style="color: var(--md-sys-color-primary);">person</span>
+                                        {{ m.user.full_name }}
+                                        {% if m.user.id == user.id %}
+                                            <span style="font-size: 11px; color: var(--md-sys-color-outline); font-weight: normal;">(você)</span>
+                                        {% endif %}
+                                    </div>
+                                </td>
+                                <td>{{ m.user.email }}</td>
+                                <td>
+                                    {% if m.role == 'owner' or m.user.id == workspace.owner_id %}
+                                        <span style="background: var(--md-sys-color-primary-container); color: var(--md-sys-color-primary); padding: 3px 10px; border-radius: var(--radius-full); font-size: 11.5px; font-weight: 700;">
+                                            Proprietário
+                                        </span>
+                                    {% else %}
+                                        <span style="background: var(--md-sys-color-secondary-container); color: var(--md-sys-color-secondary); padding: 3px 10px; border-radius: var(--radius-full); font-size: 11.5px; font-weight: 600;">
+                                            Membro Convidado
+                                        </span>
+                                    {% endif %}
+                                </td>
+                                <td style="font-size: 13px; color: var(--md-sys-color-outline);">
+                                    {{ m.joined_at.strftime("%d/%m/%Y") if m.joined_at else "Desde o início" }}
+                                </td>
+                                <td style="text-align: right;">
+                                    {% if m.role != 'owner' and m.user.id != workspace.owner_id and m.user.id != user.id %}
+                                    <button onclick="removeAccess({{ m.id }}, '{{ m.user.full_name }}')" class="m3-btn" style="width: auto; padding: 6px 12px; min-height: 32px; font-size: 12px; background: rgba(229, 57, 53, 0.12); color: var(--md-sys-color-error); border: 1px solid rgba(229, 57, 53, 0.25);">
+                                        <span class="material-symbols-outlined" style="font-size: 15px;">person_remove</span>
+                                        Revogar Acesso
+                                    </button>
+                                    {% else %}
+                                    <span style="font-size: 12px; color: var(--md-sys-color-outline);">—</span>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+
+        </main>
+    </div>
+
+    <!-- BARRA DE NAVEGAÇÃO INFERIOR MOBILE -->
+    <nav class="mobile-bottom-nav" id="mobileBottomNav">
+        <a href="/dashboard" class="bottom-nav-item" title="Visão Geral">
+            <span class="nav-icon-pill"><span class="material-symbols-outlined">dashboard</span></span>
+            <span class="nav-label">Início</span>
+        </a>
+        <a href="/receitas" class="bottom-nav-item" title="Receitas">
+            <span class="nav-icon-pill"><span class="material-symbols-outlined">trending_up</span></span>
+            <span class="nav-label">Receitas</span>
+        </a>
+        <a href="/custos" class="bottom-nav-item" title="Custos">
+            <span class="nav-icon-pill"><span class="material-symbols-outlined">payments</span></span>
+            <span class="nav-label">Custos</span>
+        </a>
+        <a href="/perfil" class="bottom-nav-item active" title="Meu Perfil">
+            <span class="nav-icon-pill"><span class="material-symbols-outlined">person</span></span>
+            <span class="nav-label">Perfil</span>
+        </a>
+        <button type="button" class="bottom-nav-item" id="bottomNavMenuBtn" title="Mais opções">
+            <span class="nav-icon-pill"><span class="material-symbols-outlined">menu</span></span>
+            <span class="nav-label">Mais</span>
+        </button>
+    </nav>
+
+    <!-- SCRIPT DE PERFIL -->
+    <script>
+        document.addEventListener("DOMContentLoaded", () => {
+            setupProfileMenu();
+        });
+
+        function setupProfileMenu() {
+            // Drawer lateral no mobile
+            const mobileMenuBtn = document.getElementById("mobileMenuBtn");
+            const bottomNavMenuBtn = document.getElementById("bottomNavMenuBtn");
+            const closeSidebarBtn = document.getElementById("closeSidebarBtn");
+            const sidebarOverlay = document.getElementById("sidebarOverlay");
+            const dashboardSidebar = document.getElementById("dashboardSidebar");
+
+            if (dashboardSidebar && sidebarOverlay) {
+                const openSidebar = () => {
+                    dashboardSidebar.classList.add("active");
+                    sidebarOverlay.classList.add("active");
+                    document.body.style.overflow = "hidden";
+                };
+                const closeSidebar = () => {
+                    dashboardSidebar.classList.remove("active");
+                    sidebarOverlay.classList.remove("active");
+                    document.body.style.overflow = "";
+                };
+                if (mobileMenuBtn) mobileMenuBtn.addEventListener("click", openSidebar);
+                if (bottomNavMenuBtn) bottomNavMenuBtn.addEventListener("click", () => {
+                    if (dashboardSidebar.classList.contains("active")) closeSidebar();
+                    else openSidebar();
+                });
+                if (closeSidebarBtn) closeSidebarBtn.addEventListener("click", closeSidebar);
+                sidebarOverlay.addEventListener("click", closeSidebar);
+            }
+
+            // Alternador de tema
+            const setupTheme = (btnId, iconId) => {
+                const btn = document.getElementById(btnId);
+                const icon = document.getElementById(iconId);
+                if (!btn || !icon) return;
+                const update = () => {
+                    const isDark = document.body.classList.contains("dark-mode");
+                    icon.innerText = isDark ? "light_mode" : "dark_mode";
+                    const meta = document.getElementById("themeColorMeta");
+                    if (meta) meta.setAttribute("content", isDark ? "#10141d" : "#f6f8fb");
+                };
+                update();
+                btn.addEventListener("click", () => {
+                    document.body.classList.toggle("dark-mode");
+                    localStorage.setItem("theme", document.body.classList.contains("dark-mode") ? "dark" : "light");
+                    update();
+                });
+            };
+            setupTheme("desktopThemeToggleBtn", "desktopThemeToggleIcon");
+            setupTheme("mobileThemeToggleBtn", "mobileThemeToggleIcon");
+
+            // Adicionar Acesso ao Espaço
+            document.getElementById("addAccessForm").addEventListener("submit", async (e) => {
+                e.preventDefault();
+                const emailInput = document.getElementById("inviteEmail");
+                const email = emailInput.value.trim();
+                if (!email) return;
+
+                const formData = new FormData();
+                formData.append("email", email);
+
+                try {
+                    const res = await fetch("/api/profile/add-access", { method: "POST", body: formData });
+                    const data = await res.json();
+                    if (res.ok) {
+                        alert(data.message || "Acesso concedido com sucesso!");
+                        window.location.reload();
+                    } else {
+                        alert("Erro: " + data.detail);
+                    }
+                } catch (err) {
+                    alert("Erro ao comunicar com o servidor.");
+                }
+            });
+        }
+
+        async function removeAccess(memberId, userName) {
+            if (!confirm(`Tem certeza que deseja revogar o acesso de "${userName}" a este Banco de Dados?`)) return;
+            try {
+                const res = await fetch(`/api/profile/remove-access/${memberId}`, { method: "POST" });
+                const data = await res.json();
+                if (res.ok) {
+                    alert(data.message || "Acesso revogado!");
+                    window.location.reload();
+                } else {
+                    alert("Erro: " + data.detail);
+                }
+            } catch (err) {
+                alert("Erro ao revogar acesso.");
+            }
+        }
+
+        async function switchWorkspace() {
+            const select = document.getElementById("switchWorkspaceSelect");
+            if (!select) return;
+            const wsId = select.value;
+            const formData = new FormData();
+            formData.append("workspace_id", wsId);
+
+            try {
+                const res = await fetch("/api/profile/switch-workspace", { method: "POST", body: formData });
+                const data = await res.json();
+                if (res.ok) {
+                    window.location.href = "/dashboard";
+                } else {
+                    alert("Erro: " + data.detail);
+                }
+            } catch (err) {
+                alert("Erro ao alternar espaço.");
+            }
+        }
+    </script>
+</body>
+</html>
