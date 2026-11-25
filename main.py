@@ -23,6 +23,7 @@ from auth import (
 )
 from email_service import send_confirmation_code, ADMIN_NOTIFICATION_EMAIL
 from ofx_parser import parse_and_import_ofx
+from pdf_parser import parse_and_import_pdf
 
 # Carrega variáveis de ambiente
 load_dotenv()
@@ -924,13 +925,13 @@ def delete_bank_account(
 
 
 @app.post("/api/upload/{account_id}")
-async def upload_ofx_file(
+async def upload_statement_file(
     account_id: int,
     file: UploadFile = File(...),
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user)
 ):
-    """Importa extrato OFX para uma conta bancária do Banco de Dados ativo do usuário."""
+    """Importa extrato OFX ou PDF para uma conta bancária do Banco de Dados ativo do usuário."""
     workspace = get_user_workspace(current_user, db)
     account = db.query(Account).filter(
         Account.id == account_id,
@@ -941,9 +942,14 @@ async def upload_ofx_file(
         raise HTTPException(status_code=404, detail="Conta bancária não encontrada no seu Banco de Dados.")
         
     file_bytes = await file.read()
+    filename_lower = (file.filename or "").lower()
+    is_pdf = filename_lower.endswith(".pdf") or file_bytes.startswith(b"%PDF")
     
     try:
-        transactions, ledger_balance = parse_and_import_ofx(file_content=file_bytes, account_id=account.id)
+        if is_pdf:
+            transactions, ledger_balance = parse_and_import_pdf(file_content=file_bytes, account_id=account.id)
+        else:
+            transactions, ledger_balance = parse_and_import_ofx(file_content=file_bytes, account_id=account.id)
         
         added_count = 0
         duplicate_count = 0

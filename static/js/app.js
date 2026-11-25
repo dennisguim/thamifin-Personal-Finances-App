@@ -105,6 +105,8 @@ function renderAccountsCards(accounts) {
             card.style.borderLeft = "4px solid #242424";
         } else if (nameLower.includes("bb") || nameLower.includes("brasil")) {
             card.style.borderLeft = "4px solid #fcee00";
+        } else if (nameLower.includes("mercado") || nameLower.includes("pago")) {
+            card.style.borderLeft = "4px solid #009ee3";
         } else {
             card.style.borderLeft = "4px solid var(--md-sys-color-primary)";
         }
@@ -121,11 +123,11 @@ function renderAccountsCards(accounts) {
             </div>
             <div class="balance-display">${formatCurrency(acc.balance)}</div>
             
-            <!-- Zona de Upload de Extrato OFX -->
+            <!-- Zona de Upload de Extrato OFX ou PDF -->
             <div class="drag-drop-area" id="dropzone-${acc.id}">
                 <span class="material-symbols-outlined" style="font-size: 32px; color: var(--md-sys-color-primary);">upload_file</span>
-                <div><b>Toque para importar</b> ou arraste extrato OFX</div>
-                <input type="file" id="fileInput-${acc.id}" style="display: none;" accept=".ofx,.xml">
+                <div><b>Toque para importar</b> ou arraste extrato OFX ou PDF</div>
+                <input type="file" id="fileInput-${acc.id}" style="display: none;" accept=".ofx,.xml,.pdf">
             </div>
         `;
         
@@ -283,7 +285,7 @@ function renderTransactions(accounts) {
         listContainer.innerHTML = `
             <tr>
                 <td colspan="5" style="text-align: center; color: var(--md-sys-color-outline); padding: 32px;">
-                    Nenhum extrato importado ainda. Faça upload de arquivos OFX acima!
+                    Nenhum extrato importado ainda. Faça upload de arquivos OFX ou PDF acima!
                 </td>
             </tr>
         `;
