@@ -867,6 +867,62 @@ def get_dashboard_data(
     }
 
 
+@app.post("/api/accounts")
+def create_bank_account(
+    bank_name: str = Form(...),
+    initial_balance: float = Form(0.0),
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
+    """Permite ao usuário cadastrar uma nova conta bancária no seu Banco de Dados ativo."""
+    name_clean = bank_name.strip()
+    if not name_clean:
+        raise HTTPException(status_code=400, detail="O nome do banco não pode ser vazio.")
+        
+    workspace = get_user_workspace(current_user, db)
+    
+    account = Account(
+        workspace_id=workspace.id,
+        user_id=current_user.id,
+        bank_name=name_clean,
+        initial_balance=initial_balance,
+        balance=initial_balance
+    )
+    db.add(account)
+    db.commit()
+    db.refresh(account)
+    return {
+        "status": "success",
+        "message": f"Conta bancária '{name_clean}' adicionada com sucesso!",
+        "account": {
+            "id": account.id,
+            "bank_name": account.bank_name,
+            "balance": account.balance
+        }
+    }
+
+
+@app.delete("/api/accounts/{account_id}")
+def delete_bank_account(
+    account_id: int,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
+    """Permite ao usuário excluir uma conta bancária do seu Banco de Dados ativo."""
+    workspace = get_user_workspace(current_user, db)
+    account = db.query(Account).filter(
+        Account.id == account_id,
+        Account.workspace_id == workspace.id
+    ).first()
+    
+    if not account:
+        raise HTTPException(status_code=404, detail="Conta bancária não encontrada no seu Banco de Dados.")
+        
+    db.delete(account)
+    db.commit()
+    return {"status": "success", "message": f"Conta '{account.bank_name}' excluída com sucesso."}
+
+
 @app.post("/api/upload/{account_id}")
 async def upload_ofx_file(
     account_id: int,

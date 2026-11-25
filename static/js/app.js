@@ -10,7 +10,45 @@ document.addEventListener("DOMContentLoaded", () => {
     loadDashboardData();
     // Configura o menu responsivo e alternadores de temas
     setupResponsiveMenuAndThemes();
+    // Configura modal de criação de novas contas bancárias
+    setupNewAccountModal();
 });
+
+function setupNewAccountModal() {
+    const form = document.getElementById("newAccountForm");
+    const closeBtn = document.getElementById("closeNewAccountModalBtn");
+    const overlay = document.getElementById("accountModalOverlay");
+    
+    if (closeBtn) closeBtn.addEventListener("click", closeNewAccountModal);
+    if (overlay) overlay.addEventListener("click", closeNewAccountModal);
+    
+    if (form) {
+        form.addEventListener("submit", async (e) => {
+            e.preventDefault();
+            const bankName = document.getElementById("newAccountBankName").value.trim();
+            const initBal = document.getElementById("newAccountInitialBalance").value;
+            
+            if (!bankName) return;
+            
+            const formData = new FormData();
+            formData.append("bank_name", bankName);
+            formData.append("initial_balance", initBal);
+            
+            try {
+                const res = await fetch("/api/accounts", { method: "POST", body: formData });
+                const data = await res.json();
+                if (res.ok) {
+                    closeNewAccountModal();
+                    loadDashboardData();
+                } else {
+                    alert("Erro: " + data.detail);
+                }
+            } catch (err) {
+                alert("Erro ao adicionar banco.");
+            }
+        });
+    }
+}
 
 async function loadDashboardData() {
     try {
@@ -42,7 +80,7 @@ function renderAccountsCards(accounts) {
     const grid = document.getElementById("accountsGrid");
     
     // Remove os cards de bancos antigos para não duplicá-los no DOM
-    const oldCards = grid.querySelectorAll(".bank-render-card");
+    const oldCards = grid.querySelectorAll(".bank-render-card, .add-bank-card");
     oldCards.forEach(c => c.remove());
     
     accounts.forEach(acc => {
@@ -50,18 +88,36 @@ function renderAccountsCards(accounts) {
         card.className = "m3-card bank-render-card";
         
         // Aplica identidade visual de acordo com o banco
-        if (acc.bank_name.toLowerCase().includes("nubank")) {
+        const nameLower = acc.bank_name.toLowerCase();
+        if (nameLower.includes("nubank")) {
             card.classList.add("card-nubank");
-        } else if (acc.bank_name.toLowerCase().includes("inter")) {
+        } else if (nameLower.includes("inter")) {
             card.classList.add("card-inter");
-        } else if (acc.bank_name.toLowerCase().includes("caixa")) {
+        } else if (nameLower.includes("caixa")) {
             card.classList.add("card-caixa");
+        } else if (nameLower.includes("itau") || nameLower.includes("itaú")) {
+            card.style.borderLeft = "4px solid #ec7000";
+        } else if (nameLower.includes("bradesco")) {
+            card.style.borderLeft = "4px solid #cc092f";
+        } else if (nameLower.includes("santander")) {
+            card.style.borderLeft = "4px solid #ea1d25";
+        } else if (nameLower.includes("c6")) {
+            card.style.borderLeft = "4px solid #242424";
+        } else if (nameLower.includes("bb") || nameLower.includes("brasil")) {
+            card.style.borderLeft = "4px solid #fcee00";
+        } else {
+            card.style.borderLeft = "4px solid var(--md-sys-color-primary)";
         }
         
         card.innerHTML = `
             <div class="card-header-bank">
-                <h3>${acc.bank_name}</h3>
-                <span class="material-symbols-outlined">account_balance</span>
+                <div style="display: flex; align-items: center; gap: 8px;">
+                    <span class="material-symbols-outlined" style="color: var(--md-sys-color-primary);">account_balance</span>
+                    <h3>${acc.bank_name}</h3>
+                </div>
+                <button type="button" onclick="deleteBankAccount(${acc.id}, '${acc.bank_name}')" style="background: none; border: none; cursor: pointer; color: var(--md-sys-color-outline); padding: 4px; border-radius: 50%; display: flex; align-items: center; transition: color 0.2s;" title="Excluir conta ${acc.bank_name}">
+                    <span class="material-symbols-outlined" style="font-size: 19px;">delete</span>
+                </button>
             </div>
             <div class="balance-display">${formatCurrency(acc.balance)}</div>
             
@@ -78,6 +134,70 @@ function renderAccountsCards(accounts) {
         // Configura ouvintes de upload assíncronos para a zona arrastar e soltar
         setupDragAndDrop(acc.id);
     });
+
+    // Card para Adicionar Nova Conta Bancária
+    const addCard = document.createElement("div");
+    addCard.className = "m3-card add-bank-card";
+    addCard.style.border = "1.5px dashed var(--md-sys-color-outline-variant)";
+    addCard.style.display = "flex";
+    addCard.style.flexDirection = "column";
+    addCard.style.alignItems = "center";
+    addCard.style.justifyContent = "center";
+    addCard.style.minHeight = "190px";
+    addCard.style.cursor = "pointer";
+    addCard.style.background = "var(--glass-input-bg)";
+    addCard.style.textAlign = "center";
+    addCard.title = "Adicionar nova conta bancária";
+    addCard.innerHTML = `
+        <span class="material-symbols-outlined" style="font-size: 38px; color: var(--md-sys-color-primary); margin-bottom: 8px;">add_card</span>
+        <span style="font-size: 15px; font-weight: 600; color: var(--md-sys-color-on-surface);">Adicionar Banco</span>
+        <span style="font-size: 12px; color: var(--md-sys-color-outline); margin-top: 4px;">Itaú, Bradesco, Santander, etc.</span>
+    `;
+    addCard.onclick = () => openNewAccountModal();
+    grid.appendChild(addCard);
+}
+
+// Excluir conta bancária
+async function deleteBankAccount(accountId, bankName) {
+    if (!confirm(`Tem certeza que deseja excluir a conta bancária "${bankName}"? Todas as movimentações importadas para ela serão removidas.`)) {
+        return;
+    }
+    try {
+        const res = await fetch(`/api/accounts/${accountId}`, { method: "DELETE" });
+        const data = await res.json();
+        if (res.ok) {
+            loadDashboardData();
+        } else {
+            alert("Erro: " + data.detail);
+        }
+    } catch (err) {
+        alert("Erro ao excluir conta bancária.");
+    }
+}
+
+// Modal de Nova Conta
+function openNewAccountModal() {
+    const modal = document.getElementById("newAccountModal");
+    const overlay = document.getElementById("accountModalOverlay");
+    if (modal && overlay) {
+        modal.classList.add("active");
+        overlay.classList.add("active");
+        const input = document.getElementById("newAccountBankName");
+        if (input) input.focus();
+    }
+}
+
+function closeNewAccountModal() {
+    const modal = document.getElementById("newAccountModal");
+    const overlay = document.getElementById("accountModalOverlay");
+    if (modal && overlay) {
+        modal.classList.remove("active");
+        overlay.classList.remove("active");
+        const nameInput = document.getElementById("newAccountBankName");
+        const balInput = document.getElementById("newAccountInitialBalance");
+        if (nameInput) nameInput.value = "";
+        if (balInput) balInput.value = "0.00";
+    }
 }
 
 function setupDragAndDrop(accountId) {
