@@ -483,11 +483,14 @@
                     e.preventDefault();
                     const bankName = document.getElementById("profileAccountBankName").value.trim();
                     const initialBalance = parseFloat(document.getElementById("profileAccountInitialBalance").value) || 0.0;
+                    const colorInput = document.getElementById("profileAccountColor");
+                    const color = colorInput ? colorInput.value : "#48b9c7";
                     if (!bankName) return;
 
                     const formData = new FormData();
                     formData.append("bank_name", bankName);
                     formData.append("initial_balance", initialBalance);
+                    formData.append("color", color);
 
                     try {
                         const res = await fetch("/api/accounts", { method: "POST", body: formData });
@@ -529,8 +532,26 @@
                 overlay.classList.remove("active");
                 const nameInput = document.getElementById("profileAccountBankName");
                 const balInput = document.getElementById("profileAccountInitialBalance");
+                const colorInput = document.getElementById("profileAccountColor");
                 if (nameInput) nameInput.value = "";
                 if (balInput) balInput.value = "0.00";
+                if (colorInput) colorInput.value = "#48b9c7";
+            }
+        }
+
+        async function changeProfileBankColor(accountId, newColor) {
+            const formData = new FormData();
+            formData.append("color", newColor);
+            try {
+                const res = await fetch(`/api/accounts/${accountId}/color`, { method: "POST", body: formData });
+                if (res.ok) {
+                    window.location.reload();
+                } else {
+                    const data = await res.json();
+                    alert("Erro ao atualizar cor: " + data.detail);
+                }
+            } catch (err) {
+                alert("Erro ao atualizar cor do banco.");
             }
         }
 
