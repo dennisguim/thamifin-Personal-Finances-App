@@ -306,7 +306,7 @@ function setupResponsiveMenuAndThemes() {
         if (desktopIcon) desktopIcon.innerText = iconName;
 
         const metaTheme = document.getElementById("themeColorMeta");
-        if (metaTheme) metaTheme.setAttribute("content", isDark ? "#20222a" : "#F4F6F9");
+        if (metaTheme) metaTheme.setAttribute("content", isDark ? "#10141d" : "#f6f8fb");
     }
 
     updateThemeIcons();
