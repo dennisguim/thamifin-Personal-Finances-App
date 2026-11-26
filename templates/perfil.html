@@ -60,57 +60,57 @@
                     <ul class="nav-links">
                         <li class="nav-item">
                             <a href="/dashboard">
-                                <span class="material-symbols-outlined">dashboard</span>
-                                Visão Geral
+                    <span class="material-symbols-outlined">dashboard</span>
+                    Visão Geral
                             </a>
                         </li>
                         <li class="nav-item">
                             <a href="/receitas">
-                                <span class="material-symbols-outlined">trending_up</span>
-                                Receitas
+                    <span class="material-symbols-outlined">trending_up</span>
+                    Receitas
                             </a>
                         </li>
                         <li class="nav-item">
                             <a href="/custos">
-                                <span class="material-symbols-outlined">payments</span>
-                                Custos Fixos / Variáveis
+                    <span class="material-symbols-outlined">payments</span>
+                    Custos Fixos / Variáveis
                             </a>
                         </li>
                         <li class="nav-item">
                             <a href="/planejamento">
-                                <span class="material-symbols-outlined">calendar_month</span>
-                                Planejamento & Previsão
+                    <span class="material-symbols-outlined">calendar_month</span>
+                    Planejamento & Previsão
                             </a>
                         </li>
                         <li class="nav-item">
                             <a href="/parcelamentos">
-                                <span class="material-symbols-outlined">credit_card</span>
-                                Parcelamentos
+                    <span class="material-symbols-outlined">credit_card</span>
+                    Parcelamentos
                             </a>
                         </li>
                         <li class="nav-item">
                             <a href="/graficos">
-                                <span class="material-symbols-outlined">bar_chart</span>
-                                Gráficos
+                    <span class="material-symbols-outlined">bar_chart</span>
+                    Gráficos
                             </a>
                         </li>
                         <li class="nav-item">
                             <a href="/metas">
-                                <span class="material-symbols-outlined">flag</span>
-                                Planejador / Metas
+                    <span class="material-symbols-outlined">flag</span>
+                    Planejador / Metas
                             </a>
                         </li>
                         <li class="nav-item active">
                             <a href="/perfil">
-                                <span class="material-symbols-outlined">person</span>
-                                Meu Perfil
+                    <span class="material-symbols-outlined">person</span>
+                    Meu Perfil
                             </a>
                         </li>
                         {% if user.is_admin %}
                         <li class="nav-item">
                             <a href="/admin" style="color: var(--md-sys-color-primary);">
-                                <span class="material-symbols-outlined">admin_panel_settings</span>
-                                Painel Admin
+                    <span class="material-symbols-outlined">admin_panel_settings</span>
+                    Painel Admin
                             </a>
                         </li>
                         {% endif %}
@@ -151,203 +151,238 @@
                 </div>
             </header>
 
-            <div class="finance-grid" style="grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));">
+            <style>
+                .profile-dashboard-grid {
+                    display: flex;
+                    flex-direction: column;
+                    gap: 20px;
+                    margin-bottom: 24px;
+                }
+                .profile-left-col {
+                    display: flex;
+                    flex-direction: column;
+                    gap: 20px;
+                }
+                .profile-right-col {
+                    min-width: 0;
+                    display: flex;
+                    flex-direction: column;
+                    gap: 20px;
+                }
+                @media (min-width: 992px) {
+                    .profile-dashboard-grid {
+                        display: grid;
+                        grid-template-columns: 350px 1fr;
+                        gap: 24px;
+                        align-items: start;
+                    }
+                }
+            </style>
+
+            <div class="profile-dashboard-grid">
                 
-                <!-- CARD 1: DADOS DA MINHA CONTA -->
-                <div class="m3-card">
-                    <div class="card-header-bank">
-                        <h3 style="display: flex; align-items: center; gap: 8px;">
-                            <span class="material-symbols-outlined" style="color: var(--md-sys-color-primary);">person</span>
-                            Minha Conta
-                        </h3>
-                        {% if user.is_admin %}
-                            <span style="background: var(--md-sys-color-primary-container); color: var(--md-sys-color-primary); font-size: 11px; font-weight: 700; padding: 3px 10px; border-radius: var(--radius-full);">
-                                ADMIN
-                            </span>
-                        {% endif %}
-                    </div>
-
-                    <div style="display: flex; flex-direction: column; gap: 12px; margin-top: 4px;">
-                        <div>
-                            <span style="font-size: 12px; color: var(--md-sys-color-outline); font-weight: 600; text-transform: uppercase;">Nome Completo</span>
-                            <div style="font-size: 17px; font-weight: 600; color: var(--md-sys-color-on-surface);">{{ user.full_name }}</div>
+                <!-- COLUNA DA ESQUERDA: DADOS PESSOAIS E SEGURANÇA -->
+                <div class="profile-left-col">
+                    
+                    <!-- CARD 1: DADOS DA MINHA CONTA (Compacto e objetivo) -->
+                    <div class="m3-card" style="padding: 22px 24px;">
+                        <div class="card-header-bank" style="margin-bottom: 16px;">
+                            <h3 style="display: flex; align-items: center; gap: 8px; margin: 0; font-size: 17px; font-weight: 700;">
+                                <span class="material-symbols-outlined" style="color: var(--md-sys-color-primary); font-size: 22px;">account_circle</span>
+                                Minha Conta
+                            </h3>
+                            {% if user.is_admin %}
+                                <span style="background: var(--md-sys-color-primary-container); color: var(--md-sys-color-primary); font-size: 11px; font-weight: 700; padding: 3px 10px; border-radius: var(--radius-full);">
+                                    ADMIN
+                                </span>
+                            {% endif %}
                         </div>
 
-                        <div>
-                            <span style="font-size: 12px; color: var(--md-sys-color-outline); font-weight: 600; text-transform: uppercase;">Email / Login</span>
-                            <div style="font-size: 15px; font-weight: 500; color: var(--md-sys-color-on-surface);">{{ user.email }}</div>
-                        </div>
+                        <div style="display: flex; flex-direction: column; gap: 12px;">
+                            <div style="background: var(--glass-input-bg); padding: 10px 14px; border-radius: var(--radius-md); border: 1px solid var(--md-sys-color-outline-variant);">
+                                <span style="font-size: 11px; color: var(--md-sys-color-outline); font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; display: block; margin-bottom: 2px;">Nome Completo</span>
+                                <div style="font-size: 15.5px; font-weight: 600; color: var(--md-sys-color-on-surface);">{{ user.full_name }}</div>
+                            </div>
 
-                        <div>
-                            <span style="font-size: 12px; color: var(--md-sys-color-outline); font-weight: 600; text-transform: uppercase;">Membro Desde</span>
-                            <div style="font-size: 14px; color: var(--md-sys-color-outline);">
-                                {{ user.created_at.strftime("%d/%m/%Y") if user.created_at else "Conta ativa" }}
+                            <div style="background: var(--glass-input-bg); padding: 10px 14px; border-radius: var(--radius-md); border: 1px solid var(--md-sys-color-outline-variant);">
+                                <span style="font-size: 11px; color: var(--md-sys-color-outline); font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; display: block; margin-bottom: 2px;">Email / Login</span>
+                                <div style="font-size: 14.5px; font-weight: 500; color: var(--md-sys-color-on-surface); word-break: break-all;">{{ user.email }}</div>
+                            </div>
+
+                            <div style="background: var(--glass-input-bg); padding: 10px 14px; border-radius: var(--radius-md); border: 1px solid var(--md-sys-color-outline-variant);">
+                                <span style="font-size: 11px; color: var(--md-sys-color-outline); font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; display: block; margin-bottom: 2px;">Membro Desde</span>
+                                <div style="font-size: 13.5px; font-weight: 500; color: var(--md-sys-color-outline);">
+                                    {{ user.created_at.strftime("%d/%m/%Y") if user.created_at else "Conta ativa" }}
+                                </div>
                             </div>
                         </div>
                     </div>
+
+                    <!-- CARD 2: SEGURANÇA E ALTERAÇÃO DE SENHA -->
+                    <div class="m3-card" style="padding: 22px 24px;">
+                        <div class="card-header-bank" style="margin-bottom: 8px;">
+                            <h3 style="display: flex; align-items: center; gap: 8px; margin: 0; font-size: 17px; font-weight: 700;">
+                                <span class="material-symbols-outlined" style="color: var(--md-sys-color-primary); font-size: 22px;">lock_reset</span>
+                                Segurança da Conta
+                            </h3>
+                            <span style="background: var(--glass-input-bg); color: var(--md-sys-color-primary); font-size: 11px; font-weight: 700; padding: 3px 10px; border-radius: var(--radius-full); border: 1px solid var(--md-sys-color-outline-variant);">
+                                Alterar Senha
+                            </span>
+                        </div>
+
+                        <p style="font-size: 12.5px; color: var(--md-sys-color-outline); margin-top: 0; margin-bottom: 14px; line-height: 1.4;">
+                            Altere sua senha de acesso mantendo sua conta protegida.
+                        </p>
+
+                        <form id="changePasswordForm" style="display: flex; flex-direction: column; gap: 12px;">
+                            <div style="display: flex; flex-direction: column; gap: 5px;">
+                                <label for="currentPassword" style="font-size: 12px; font-weight: 600; color: var(--md-sys-color-outline);">
+                                    Senha Atual:
+                                </label>
+                                <div style="position: relative; display: flex; align-items: center;">
+                                    <input type="password" id="currentPassword" required class="filter-select" placeholder="Digite sua senha atual" style="width: 100%; padding-right: 42px; min-height: 40px; font-size: 13.5px;">
+                                    <button type="button" onclick="togglePasswordVisibility('currentPassword', 'toggleCurrentPassIcon')" style="position: absolute; right: 10px; background: none; border: none; cursor: pointer; color: var(--md-sys-color-outline); display: flex; align-items: center; justify-content: center; padding: 4px;" title="Mostrar/ocultar senha">
+                                        <span class="material-symbols-outlined" id="toggleCurrentPassIcon" style="font-size: 19px;">visibility</span>
+                                    </button>
+                                </div>
+                            </div>
+
+                            <div style="display: flex; flex-direction: column; gap: 5px;">
+                                <label for="newPassword" style="font-size: 12px; font-weight: 600; color: var(--md-sys-color-outline);">
+                                    Nova Senha:
+                                </label>
+                                <div style="position: relative; display: flex; align-items: center;">
+                                    <input type="password" id="newPassword" required minlength="6" class="filter-select" placeholder="Mínimo de 6 caracteres" style="width: 100%; padding-right: 42px; min-height: 40px; font-size: 13.5px;">
+                                    <button type="button" onclick="togglePasswordVisibility('newPassword', 'toggleNewPassIcon')" style="position: absolute; right: 10px; background: none; border: none; cursor: pointer; color: var(--md-sys-color-outline); display: flex; align-items: center; justify-content: center; padding: 4px;" title="Mostrar/ocultar senha">
+                                        <span class="material-symbols-outlined" id="toggleNewPassIcon" style="font-size: 19px;">visibility</span>
+                                    </button>
+                                </div>
+                            </div>
+
+                            <div style="display: flex; flex-direction: column; gap: 5px;">
+                                <label for="confirmPassword" style="font-size: 12px; font-weight: 600; color: var(--md-sys-color-outline);">
+                                    Confirmar Nova Senha:
+                                </label>
+                                <div style="position: relative; display: flex; align-items: center;">
+                                    <input type="password" id="confirmPassword" required minlength="6" class="filter-select" placeholder="Repita a nova senha" style="width: 100%; padding-right: 42px; min-height: 40px; font-size: 13.5px;">
+                                    <button type="button" onclick="togglePasswordVisibility('confirmPassword', 'toggleConfirmPassIcon')" style="position: absolute; right: 10px; background: none; border: none; cursor: pointer; color: var(--md-sys-color-outline); display: flex; align-items: center; justify-content: center; padding: 4px;" title="Mostrar/ocultar senha">
+                                        <span class="material-symbols-outlined" id="toggleConfirmPassIcon" style="font-size: 19px;">visibility</span>
+                                    </button>
+                                </div>
+                            </div>
+
+                            <div id="passwordAlertBox" style="display: none; padding: 10px 14px; border-radius: var(--radius-sm); font-size: 13px; font-weight: 500;"></div>
+
+                            <button type="submit" id="submitChangePassBtn" class="m3-btn m3-btn-primary" style="margin-top: 4px; width: 100%; justify-content: center; min-height: 40px; font-size: 13px; gap: 8px;">
+                                <span class="material-symbols-outlined" style="font-size: 18px;">key</span>
+                                Alterar Senha
+                            </button>
+                        </form>
+                    </div>
+
                 </div>
 
-                <!-- CARD 2: MEU BANCO DE DADOS / ESPAÇO ATIVO -->
-                <div class="m3-card">
-                    <div class="card-header-bank">
-                        <h3 style="display: flex; align-items: center; gap: 8px;">
-                            <span class="material-symbols-outlined" style="color: var(--md-sys-color-secondary);">database</span>
-                            Meu Banco de Dados Ativo
-                        </h3>
-                        <code style="background: var(--glass-input-bg); padding: 3px 8px; border-radius: var(--radius-xs); font-size: 11.5px;">{{ workspace.db_identifier }}</code>
-                    </div>
-
-                    <div style="display: flex; flex-direction: column; gap: 14px;">
-                        <div>
-                            <span style="font-size: 12px; color: var(--md-sys-color-outline); font-weight: 600; text-transform: uppercase;">Nome do Espaço</span>
-                            <div style="font-size: 18px; font-weight: 700; color: var(--md-sys-color-primary);">{{ workspace.name }}</div>
+                <!-- COLUNA DA DIREITA: BANCO DE DADOS E CONTAS BANCÁRIAS (Amplo espaço horizontal) -->
+                <div class="profile-right-col">
+                    
+                    <!-- CARD 3: MEU BANCO DE DADOS / ESPAÇO ATIVO -->
+                    <div class="m3-card" style="padding: 22px 24px;">
+                        <div class="card-header-bank" style="margin-bottom: 16px;">
+                            <h3 style="display: flex; align-items: center; gap: 8px; margin: 0; font-size: 18px; font-weight: 700;">
+                                <span class="material-symbols-outlined" style="color: var(--md-sys-color-secondary); font-size: 24px;">database</span>
+                                Meu Banco de Dados Ativo
+                            </h3>
+                            <code style="background: var(--glass-input-bg); padding: 4px 10px; border-radius: var(--radius-xs); font-size: 12px; font-weight: 600; border: 1px solid var(--md-sys-color-outline-variant);">{{ workspace.db_identifier }}</code>
                         </div>
 
-                        {% if all_user_workspaces|length > 1 %}
-                        <div style="padding-top: 8px; border-top: 1px solid var(--md-sys-color-outline-variant);">
-                            <label for="switchWorkspaceSelect" style="font-size: 12.5px; font-weight: 600; color: var(--md-sys-color-outline); display: block; margin-bottom: 6px;">
-                                Alternar Banco de Dados Ativo:
-                            </label>
-                            <div style="display: flex; gap: 8px;">
-                                <select id="switchWorkspaceSelect" class="filter-select" style="flex: 1; min-height: 40px; padding: 8px 14px;">
-                                    {% for m in all_user_workspaces %}
-                                        <option value="{{ m.workspace_id }}" {% if m.workspace_id == workspace.id %}selected{% endif %}>
-                                            {{ m.workspace.name }} ({{ m.workspace.db_identifier }})
-                                        </option>
-                                    {% endfor %}
-                                </select>
-                                <button onclick="switchWorkspace()" class="m3-btn m3-btn-primary" style="width: auto; min-height: 40px; padding: 8px 16px; font-size: 13px;">
-                                    Trocar
-                                </button>
-                            </div>
-                        </div>
-                        {% endif %}
+                        <div style="display: flex; flex-direction: column; gap: 16px;">
+                            <div style="background: var(--glass-input-bg); padding: 14px 16px; border-radius: var(--radius-md); border: 1px solid var(--md-sys-color-outline-variant); display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px;">
+                                <div>
+                                    <span style="font-size: 11px; color: var(--md-sys-color-outline); font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em;">Nome do Espaço</span>
+                                    <div style="font-size: 19px; font-weight: 700; color: var(--md-sys-color-primary); margin-top: 2px;">{{ workspace.name }}</div>
+                                </div>
 
-                        <div>
-                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
-                                <span style="font-size: 12px; color: var(--md-sys-color-outline); font-weight: 600; text-transform: uppercase; letter-spacing: 0.04em;">Contas Bancárias Conectadas</span>
-                                <button type="button" onclick="openProfileNewAccountModal()" class="m3-btn m3-btn-secondary" style="width: auto; padding: 6px 12px; min-height: 30px; font-size: 12px; border-radius: var(--radius-sm); display: inline-flex; align-items: center; gap: 4px;">
-                                    <span class="material-symbols-outlined" style="font-size: 16px;">add_card</span>
-                                    Adicionar Banco
-                                </button>
+                                {% if all_user_workspaces|length > 1 %}
+                                <div style="display: flex; gap: 8px; align-items: center;">
+                                    <select id="switchWorkspaceSelect" class="filter-select" style="min-height: 38px; padding: 6px 12px; font-size: 13px;">
+                                        {% for m in all_user_workspaces %}
+                                            <option value="{{ m.workspace_id }}" {% if m.workspace_id == workspace.id %}selected{% endif %}>
+                                                {{ m.workspace.name }} ({{ m.workspace.db_identifier }})
+                                            </option>
+                                        {% endfor %}
+                                    </select>
+                                    <button onclick="switchWorkspace()" class="m3-btn m3-btn-primary" style="width: auto; min-height: 38px; padding: 6px 14px; font-size: 13px;">
+                                        Trocar
+                                    </button>
+                                </div>
+                                {% endif %}
                             </div>
-                            
-                            <div style="display: flex; flex-direction: column; gap: 10px;">
-                                {% for acc in workspace_accounts %}
-                                <div id="profileAccountCard_{{ acc.id }}" style="display: flex; align-items: center; justify-content: space-between; padding: 12px 16px; border-radius: var(--radius-md); background: var(--glass-input-bg); border: 1px solid var(--md-sys-color-outline-variant); border-left: 6px solid {{ acc.color or '#48b9c7' }}; gap: 14px; transition: border-left-color 0.2s ease;">
-                                    <div style="display: flex; align-items: center; gap: 12px; min-width: 0;">
-                                        <!-- Círculo de Amostra Interativo com Seletor Nativo Cross-browser -->
-                                        <label id="profileBankSwatchWrap_{{ acc.id }}" title="Clique para alterar a cor de destaque do {{ acc.bank_name }}" style="cursor: pointer; position: relative; display: block; width: 26px; height: 26px; min-width: 26px; min-height: 26px; border-radius: 50%; overflow: hidden; border: 3px solid #ffffff; box-shadow: 0 0 0 1.5px rgba(0,0,0,0.18), 0 2px 6px rgba(0,0,0,0.25); flex-shrink: 0; background-color: {{ acc.color or '#48b9c7' }};">
-                                            <input type="color" 
-                                                   id="profileBankColor_{{ acc.id }}" 
-                                                   value="{{ acc.color or '#48b9c7' }}" 
-                                                   onchange="changeProfileBankColor({{ acc.id }}, this.value)" 
-                                                   oninput="previewProfileBankColor({{ acc.id }}, this.value)" 
-                                                   style="position: absolute; top: -50%; left: -50%; width: 200%; height: 200%; opacity: 0; cursor: pointer; border: none; padding: 0; margin: 0;">
-                                        </label>
-                                        
-                                        <div style="min-width: 0;">
-                                            <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
-                                                <span style="font-size: 15px; font-weight: 700; color: var(--md-sys-color-on-surface); line-height: 1.2;">
-                                                    {{ acc.bank_name }}
-                                                </span>
-                                                <!-- Pílula Oficial com Contraste Automático -->
-                                                <span id="profileBankPill_{{ acc.id }}" class="badge-bank" style="background-color: {{ acc.color or '#48b9c7' }}; color: {{ (acc.color or '#48b9c7')|contrast_color }}; border: {{ '1px solid rgba(0,0,0,0.18)' if (acc.color or '#48b9c7')|is_light_color else '1px solid rgba(255,255,255,0.25)' }};">
-                                                    {{ acc.bank_name }}
-                                                </span>
-                                            </div>
-                                            <div style="font-size: 13px; font-weight: 600; color: var(--md-sys-color-primary); margin-top: 3px;">
-                                                R$ {{ '%.2f'|format(acc.balance) }}
+
+                            <div>
+                                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+                                    <span style="font-size: 12px; color: var(--md-sys-color-outline); font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em;">Contas Bancárias Conectadas</span>
+                                    <button type="button" onclick="openProfileNewAccountModal()" class="m3-btn m3-btn-secondary" style="width: auto; padding: 6px 14px; min-height: 32px; font-size: 12px; border-radius: var(--radius-sm); display: inline-flex; align-items: center; gap: 6px;">
+                                        <span class="material-symbols-outlined" style="font-size: 16px;">add_card</span>
+                                        Adicionar Banco
+                                    </button>
+                                </div>
+                                
+                                <div style="display: flex; flex-direction: column; gap: 10px;">
+                                    {% for acc in workspace_accounts %}
+                                    <div id="profileAccountCard_{{ acc.id }}" style="display: flex; align-items: center; justify-content: space-between; padding: 12px 16px; border-radius: var(--radius-md); background: var(--glass-input-bg); border: 1px solid var(--md-sys-color-outline-variant); border-left: 6px solid {{ acc.color or '#48b9c7' }}; gap: 14px; transition: border-left-color 0.2s ease;">
+                                        <div style="display: flex; align-items: center; gap: 12px; min-width: 0;">
+                                            <!-- Círculo de Amostra Interativo com Seletor Nativo Cross-browser -->
+                                            <label id="profileBankSwatchWrap_{{ acc.id }}" title="Clique para alterar a cor de destaque do {{ acc.bank_name }}" style="cursor: pointer; position: relative; display: block; width: 28px; height: 28px; min-width: 28px; min-height: 28px; border-radius: 50%; overflow: hidden; border: 3px solid #ffffff; box-shadow: 0 0 0 1.5px rgba(0,0,0,0.18), 0 2px 6px rgba(0,0,0,0.25); flex-shrink: 0; background-color: {{ acc.color or '#48b9c7' }};">
+                                                <input type="color" 
+                                                       id="profileBankColor_{{ acc.id }}" 
+                                                       value="{{ acc.color or '#48b9c7' }}" 
+                                                       onchange="changeProfileBankColor({{ acc.id }}, this.value)" 
+                                                       oninput="previewProfileBankColor({{ acc.id }}, this.value)" 
+                                                       style="position: absolute; top: -50%; left: -50%; width: 200%; height: 200%; opacity: 0; cursor: pointer; border: none; padding: 0; margin: 0;">
+                                            </label>
+                                            
+                                            <div style="min-width: 0;">
+                                                <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
+                                                    <span style="font-size: 15px; font-weight: 700; color: var(--md-sys-color-on-surface); line-height: 1.2;">
+                                                        {{ acc.bank_name }}
+                                                    </span>
+                                                    <!-- Pílula Oficial com Contraste Automático -->
+                                                    <span id="profileBankPill_{{ acc.id }}" class="badge-bank" style="background-color: {{ acc.color or '#48b9c7' }}; color: {{ (acc.color or '#48b9c7')|contrast_color }}; border: {{ '1px solid rgba(0,0,0,0.18)' if (acc.color or '#48b9c7')|is_light_color else '1px solid rgba(255,255,255,0.25)' }};">
+                                                        {{ acc.bank_name }}
+                                                    </span>
+                                                </div>
+                                                <div style="font-size: 13.5px; font-weight: 600; color: var(--md-sys-color-primary); margin-top: 3px;">
+                                                    R$ {{ '%.2f'|format(acc.balance) }}
+                                                </div>
                                             </div>
                                         </div>
-                                    </div>
 
-                                    <div style="display: flex; align-items: center; gap: 8px; flex-shrink: 0;">
-                                        <!-- Botão Alterar Cor (Nativo com clique direto) -->
-                                        <label class="m3-btn m3-btn-secondary" style="position: relative; overflow: hidden; cursor: pointer; width: auto; padding: 6px 12px; min-height: 30px; font-size: 12px; border-radius: var(--radius-sm); display: inline-flex; align-items: center; gap: 5px;" title="Alterar cor de destaque do {{ acc.bank_name }}">
-                                            <span class="material-symbols-outlined" id="paletteIcon_{{ acc.id }}" style="font-size: 16px; color: {{ acc.color or '#48b9c7' }};">palette</span>
-                                            <span>Alterar Cor</span>
-                                            <input type="color" 
-                                                   value="{{ acc.color or '#48b9c7' }}" 
-                                                   onchange="changeProfileBankColor({{ acc.id }}, this.value)" 
-                                                   oninput="previewProfileBankColor({{ acc.id }}, this.value)" 
-                                                   style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; opacity: 0; cursor: pointer; border: none; padding: 0; margin: 0;">
-                                        </label>
-                                        
-                                        <!-- Botão Excluir Banco -->
-                                        <button type="button" onclick="deleteAccountFromProfile({{ acc.id }}, '{{ acc.bank_name }}')" class="m3-btn" style="width: auto; padding: 6px 9px; min-height: 30px; font-size: 12px; border-radius: var(--radius-sm); background: rgba(229, 57, 53, 0.1); color: var(--md-sys-color-error); border: 1px solid rgba(229, 57, 53, 0.25); display: inline-flex; align-items: center;" title="Excluir conta {{ acc.bank_name }}">
-                                            <span class="material-symbols-outlined" style="font-size: 16px;">delete</span>
-                                        </button>
+                                        <div style="display: flex; align-items: center; gap: 8px; flex-shrink: 0;">
+                                            <!-- Botão Alterar Cor (Nativo com clique direto) -->
+                                            <label class="m3-btn m3-btn-secondary" style="position: relative; overflow: hidden; cursor: pointer; width: auto; padding: 6px 12px; min-height: 32px; font-size: 12px; border-radius: var(--radius-sm); display: inline-flex; align-items: center; gap: 5px;" title="Alterar cor de destaque do {{ acc.bank_name }}">
+                                                <span class="material-symbols-outlined" id="paletteIcon_{{ acc.id }}" style="font-size: 16px; color: {{ acc.color or '#48b9c7' }};">palette</span>
+                                                <span>Alterar Cor</span>
+                                                <input type="color" 
+                                                       value="{{ acc.color or '#48b9c7' }}" 
+                                                       onchange="changeProfileBankColor({{ acc.id }}, this.value)" 
+                                                       oninput="previewProfileBankColor({{ acc.id }}, this.value)" 
+                                                       style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; opacity: 0; cursor: pointer; border: none; padding: 0; margin: 0;">
+                                            </label>
+                                            
+                                            <!-- Botão Excluir Banco -->
+                                            <button type="button" onclick="deleteAccountFromProfile({{ acc.id }}, '{{ acc.bank_name }}')" class="m3-btn" style="width: auto; padding: 6px 9px; min-height: 32px; font-size: 12px; border-radius: var(--radius-sm); background: rgba(229, 57, 53, 0.1); color: var(--md-sys-color-error); border: 1px solid rgba(229, 57, 53, 0.25); display: inline-flex; align-items: center;" title="Excluir conta {{ acc.bank_name }}">
+                                                <span class="material-symbols-outlined" style="font-size: 16px;">delete</span>
+                                            </button>
+                                        </div>
                                     </div>
+                                    {% else %}
+                                        <span style="font-size: 13px; color: var(--md-sys-color-outline);">Nenhuma conta cadastrada</span>
+                                    {% endfor %}
                                 </div>
-                                {% else %}
-                                    <span style="font-size: 13px; color: var(--md-sys-color-outline);">Nenhuma conta cadastrada</span>
-                                {% endfor %}
                             </div>
                         </div>
                     </div>
-                </div>
 
-                <!-- CARD 3: SEGURANÇA E ALTERAÇÃO DE SENHA -->
-                <div class="m3-card">
-                    <div class="card-header-bank">
-                        <h3 style="display: flex; align-items: center; gap: 8px;">
-                            <span class="material-symbols-outlined" style="color: var(--md-sys-color-primary);">lock_reset</span>
-                            Segurança da Conta
-                        </h3>
-                        <span style="background: var(--glass-input-bg); color: var(--md-sys-color-primary); font-size: 11.5px; font-weight: 700; padding: 3px 10px; border-radius: var(--radius-full); border: 1px solid var(--md-sys-color-outline-variant);">
-                            Senha de Acesso
-                        </span>
-                    </div>
-
-                    <p style="font-size: 13px; color: var(--md-sys-color-outline); margin-top: 2px; margin-bottom: 14px;">
-                        Altere sua senha de login mantendo sua conta protegida.
-                    </p>
-
-                    <form id="changePasswordForm" style="display: flex; flex-direction: column; gap: 14px;">
-                        <div style="display: flex; flex-direction: column; gap: 6px;">
-                            <label for="currentPassword" style="font-size: 12.5px; font-weight: 600; color: var(--md-sys-color-outline);">
-                                Senha Atual:
-                            </label>
-                            <div style="position: relative; display: flex; align-items: center;">
-                                <input type="password" id="currentPassword" required class="filter-select" placeholder="Digite sua senha atual" style="width: 100%; padding-right: 42px; min-height: 42px;">
-                                <button type="button" onclick="togglePasswordVisibility('currentPassword', 'toggleCurrentPassIcon')" style="position: absolute; right: 10px; background: none; border: none; cursor: pointer; color: var(--md-sys-color-outline); display: flex; align-items: center; justify-content: center; padding: 4px;" title="Mostrar/ocultar senha">
-                                    <span class="material-symbols-outlined" id="toggleCurrentPassIcon" style="font-size: 20px;">visibility</span>
-                                </button>
-                            </div>
-                        </div>
-
-                        <div style="display: flex; flex-direction: column; gap: 6px;">
-                            <label for="newPassword" style="font-size: 12.5px; font-weight: 600; color: var(--md-sys-color-outline);">
-                                Nova Senha:
-                            </label>
-                            <div style="position: relative; display: flex; align-items: center;">
-                                <input type="password" id="newPassword" required minlength="6" class="filter-select" placeholder="Mínimo de 6 caracteres" style="width: 100%; padding-right: 42px; min-height: 42px;">
-                                <button type="button" onclick="togglePasswordVisibility('newPassword', 'toggleNewPassIcon')" style="position: absolute; right: 10px; background: none; border: none; cursor: pointer; color: var(--md-sys-color-outline); display: flex; align-items: center; justify-content: center; padding: 4px;" title="Mostrar/ocultar senha">
-                                    <span class="material-symbols-outlined" id="toggleNewPassIcon" style="font-size: 20px;">visibility</span>
-                                </button>
-                            </div>
-                        </div>
-
-                        <div style="display: flex; flex-direction: column; gap: 6px;">
-                            <label for="confirmPassword" style="font-size: 12.5px; font-weight: 600; color: var(--md-sys-color-outline);">
-                                Confirmar Nova Senha:
-                            </label>
-                            <div style="position: relative; display: flex; align-items: center;">
-                                <input type="password" id="confirmPassword" required minlength="6" class="filter-select" placeholder="Repita a nova senha" style="width: 100%; padding-right: 42px; min-height: 42px;">
-                                <button type="button" onclick="togglePasswordVisibility('confirmPassword', 'toggleConfirmPassIcon')" style="position: absolute; right: 10px; background: none; border: none; cursor: pointer; color: var(--md-sys-color-outline); display: flex; align-items: center; justify-content: center; padding: 4px;" title="Mostrar/ocultar senha">
-                                    <span class="material-symbols-outlined" id="toggleConfirmPassIcon" style="font-size: 20px;">visibility</span>
-                                </button>
-                            </div>
-                        </div>
-
-                        <div id="passwordAlertBox" style="display: none; padding: 10px 14px; border-radius: var(--radius-sm); font-size: 13px; font-weight: 500;"></div>
-
-                        <button type="submit" id="submitChangePassBtn" class="m3-btn m3-btn-primary" style="margin-top: 6px; width: 100%; justify-content: center; min-height: 42px; gap: 8px;">
-                            <span class="material-symbols-outlined">key</span>
-                            Alterar Senha
-                        </button>
-                    </form>
                 </div>
 
             </div>
@@ -371,7 +406,7 @@
                     <form id="addAccessForm" style="display: flex; width: 100%; gap: 12px; align-items: flex-end; flex-wrap: wrap;">
                         <div style="flex: 1; min-width: 260px; display: flex; flex-direction: column; gap: 6px;">
                             <label for="inviteEmail" style="font-size: 13px; font-weight: 600; color: var(--md-sys-color-outline);">
-                                Email da Conta a ser adicionada:
+                    Email da Conta a ser adicionada:
                             </label>
                             <input type="email" id="inviteEmail" placeholder="ex: thami@exemplo.com" required class="filter-select" style="min-height: 46px;">
                         </div>
@@ -388,50 +423,50 @@
                     <table class="tx-table">
                         <thead>
                             <tr>
-                                <th>Nome do Usuário</th>
-                                <th>Email</th>
-                                <th>Papel no Espaço</th>
-                                <th>Data de Acesso</th>
-                                <th style="text-align: right;">Ação</th>
+                    <th>Nome do Usuário</th>
+                    <th>Email</th>
+                    <th>Papel no Espaço</th>
+                    <th>Data de Acesso</th>
+                    <th style="text-align: right;">Ação</th>
                             </tr>
                         </thead>
                         <tbody>
                             {% for m in workspace_members %}
                             <tr class="tx-row">
-                                <td style="font-weight: 600;">
-                                    <div style="display: flex; align-items: center; gap: 8px;">
-                                        <span class="material-symbols-outlined" style="color: var(--md-sys-color-primary);">person</span>
-                                        {{ m.user.full_name }}
-                                        {% if m.user.id == user.id %}
-                                            <span style="font-size: 11px; color: var(--md-sys-color-outline); font-weight: normal;">(você)</span>
-                                        {% endif %}
-                                    </div>
-                                </td>
-                                <td>{{ m.user.email }}</td>
-                                <td>
-                                    {% if m.role == 'owner' or m.user.id == workspace.owner_id %}
-                                        <span style="background: var(--md-sys-color-primary-container); color: var(--md-sys-color-primary); padding: 3px 10px; border-radius: var(--radius-full); font-size: 11.5px; font-weight: 700;">
-                                            Proprietário
-                                        </span>
-                                    {% else %}
-                                        <span style="background: var(--md-sys-color-secondary-container); color: var(--md-sys-color-secondary); padding: 3px 10px; border-radius: var(--radius-full); font-size: 11.5px; font-weight: 600;">
-                                            Membro Convidado
-                                        </span>
-                                    {% endif %}
-                                </td>
-                                <td style="font-size: 13px; color: var(--md-sys-color-outline);">
-                                    {{ m.joined_at.strftime("%d/%m/%Y") if m.joined_at else "Desde o início" }}
-                                </td>
-                                <td style="text-align: right;">
-                                    {% if m.role != 'owner' and m.user.id != workspace.owner_id and m.user.id != user.id %}
-                                    <button onclick="removeAccess({{ m.id }}, '{{ m.user.full_name }}')" class="m3-btn" style="width: auto; padding: 6px 12px; min-height: 32px; font-size: 12px; background: rgba(229, 57, 53, 0.12); color: var(--md-sys-color-error); border: 1px solid rgba(229, 57, 53, 0.25);">
-                                        <span class="material-symbols-outlined" style="font-size: 15px;">person_remove</span>
-                                        Revogar Acesso
-                                    </button>
-                                    {% else %}
-                                    <span style="font-size: 12px; color: var(--md-sys-color-outline);">—</span>
-                                    {% endif %}
-                                </td>
+                    <td style="font-weight: 600;">
+                    <div style="display: flex; align-items: center; gap: 8px;">
+                    <span class="material-symbols-outlined" style="color: var(--md-sys-color-primary);">person</span>
+                    {{ m.user.full_name }}
+                    {% if m.user.id == user.id %}
+                    <span style="font-size: 11px; color: var(--md-sys-color-outline); font-weight: normal;">(você)</span>
+                    {% endif %}
+                    </div>
+                    </td>
+                    <td>{{ m.user.email }}</td>
+                    <td>
+                    {% if m.role == 'owner' or m.user.id == workspace.owner_id %}
+                    <span style="background: var(--md-sys-color-primary-container); color: var(--md-sys-color-primary); padding: 3px 10px; border-radius: var(--radius-full); font-size: 11.5px; font-weight: 700;">
+                    Proprietário
+                    </span>
+                    {% else %}
+                    <span style="background: var(--md-sys-color-secondary-container); color: var(--md-sys-color-secondary); padding: 3px 10px; border-radius: var(--radius-full); font-size: 11.5px; font-weight: 600;">
+                    Membro Convidado
+                    </span>
+                    {% endif %}
+                    </td>
+                    <td style="font-size: 13px; color: var(--md-sys-color-outline);">
+                    {{ m.joined_at.strftime("%d/%m/%Y") if m.joined_at else "Desde o início" }}
+                    </td>
+                    <td style="text-align: right;">
+                    {% if m.role != 'owner' and m.user.id != workspace.owner_id and m.user.id != user.id %}
+                    <button onclick="removeAccess({{ m.id }}, '{{ m.user.full_name }}')" class="m3-btn" style="width: auto; padding: 6px 12px; min-height: 32px; font-size: 12px; background: rgba(229, 57, 53, 0.12); color: var(--md-sys-color-error); border: 1px solid rgba(229, 57, 53, 0.25);">
+                    <span class="material-symbols-outlined" style="font-size: 15px;">person_remove</span>
+                    Revogar Acesso
+                    </button>
+                    {% else %}
+                    <span style="font-size: 12px; color: var(--md-sys-color-outline);">—</span>
+                    {% endif %}
+                    </td>
                             </tr>
                             {% endfor %}
                         </tbody>
