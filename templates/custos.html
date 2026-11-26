@@ -77,6 +77,12 @@
                                 Custos Fixos / Variáveis
                             </a>
                         </li>
+                        <li class="nav-item {% if active_page == 'planejamento' %}active{% endif %}">
+                            <a href="/planejamento">
+                                <span class="material-symbols-outlined">calendar_month</span>
+                                Planejamento & Previsão
+                            </a>
+                        </li>
                         <li class="nav-item {% if active_page == 'parcelamentos' %}active{% endif %}">
                             <a href="/parcelamentos">
                                 <span class="material-symbols-outlined">credit_card</span>
@@ -357,11 +363,11 @@
             <span class="nav-icon-pill"><span class="material-symbols-outlined">payments</span></span>
             <span class="nav-label">Custos</span>
         </a>
-        <a href="/parcelamentos" class="bottom-nav-item {% if active_page == 'parcelamentos' %}active{% endif %}" title="Parcelamentos">
-            <span class="nav-icon-pill"><span class="material-symbols-outlined">credit_card</span></span>
-            <span class="nav-label">Parcelas</span>
+        <a href="/planejamento" class="bottom-nav-item {% if active_page == 'planejamento' %}active{% endif %}" title="Planejamento">
+            <span class="nav-icon-pill"><span class="material-symbols-outlined">calendar_month</span></span>
+            <span class="nav-label">Planejar</span>
         </a>
-        <button type="button" class="bottom-nav-item {% if active_page in ['graficos', 'metas'] %}active{% endif %}" id="bottomNavMenuBtn" title="Mais opções">
+        <button type="button" class="bottom-nav-item {% if active_page in ['graficos', 'metas', 'parcelamentos'] %}active{% endif %}" id="bottomNavMenuBtn" title="Mais opções">
             <span class="nav-icon-pill"><span class="material-symbols-outlined">menu</span></span>
             <span class="nav-label">Mais</span>
         </button>

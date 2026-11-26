@@ -1695,3 +1695,162 @@ input[type=range]#expenseSlider::-webkit-slider-thumb:hover {
         font-size: 15.5px;
     }
 }
+
+/* ========================================================
+   PLANEJAMENTO & PREVISÃO ORÇAMENTÁRIA (M3 GLASS STYLES)
+   ======================================================== */
+
+.category-budget-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(290px, 1fr));
+    gap: 16px;
+    margin-top: 14px;
+}
+
+.category-budget-card {
+    background: var(--glass-input-bg);
+    border: 1px solid var(--md-sys-color-outline-variant);
+    border-radius: var(--radius-md);
+    padding: 16px 18px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.category-budget-card:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--glass-shadow-hover);
+}
+
+.category-budget-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 8px;
+}
+
+.category-budget-title {
+    font-size: 14.5px;
+    font-weight: 700;
+    color: var(--md-sys-color-on-surface);
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.badge-status-ok {
+    font-size: 11px;
+    font-weight: 700;
+    padding: 2px 8px;
+    border-radius: var(--radius-full);
+    background: rgba(46, 125, 50, 0.15);
+    color: #2e7d32;
+    border: 1px solid rgba(46, 125, 50, 0.25);
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.badge-status-exceeded {
+    font-size: 11px;
+    font-weight: 700;
+    padding: 2px 8px;
+    border-radius: var(--radius-full);
+    background: rgba(229, 57, 53, 0.15);
+    color: #e53935;
+    border: 1px solid rgba(229, 57, 53, 0.25);
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.badge-status-neutral {
+    font-size: 11px;
+    font-weight: 600;
+    padding: 2px 8px;
+    border-radius: var(--radius-full);
+    background: var(--md-sys-color-surface-container);
+    color: var(--md-sys-color-outline);
+    border: 1px solid var(--md-sys-color-outline-variant);
+    display: inline-flex;
+    align-items: center;
+}
+
+.badge-recurrent {
+    font-size: 11px;
+    font-weight: 700;
+    padding: 2px 8px;
+    border-radius: var(--radius-full);
+    background: rgba(130, 10, 209, 0.12);
+    color: #820ad1;
+    border: 1px solid rgba(130, 10, 209, 0.22);
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.badge-single {
+    font-size: 11px;
+    font-weight: 600;
+    padding: 2px 8px;
+    border-radius: var(--radius-full);
+    background: var(--md-sys-color-surface-container-high);
+    color: var(--md-sys-color-outline);
+    border: 1px solid var(--md-sys-color-outline-variant);
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.badge-cost-fixo {
+    font-size: 11px;
+    font-weight: 700;
+    padding: 2px 8px;
+    border-radius: var(--radius-full);
+    background: rgba(0, 102, 174, 0.12);
+    color: #0066ae;
+    border: 1px solid rgba(0, 102, 174, 0.22);
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.badge-cost-variavel {
+    font-size: 11px;
+    font-weight: 700;
+    padding: 2px 8px;
+    border-radius: var(--radius-full);
+    background: rgba(255, 122, 0, 0.12);
+    color: #e06900;
+    border: 1px solid rgba(255, 122, 0, 0.22);
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+}
+
+/* Switch Toggle CSS */
+.switch input:checked + .slider {
+    background-color: var(--md-sys-color-primary) !important;
+}
+
+.switch input:focus + .slider {
+    box-shadow: 0 0 1px var(--md-sys-color-primary);
+}
+
+.switch input:checked + .slider:before {
+    transform: translateX(20px);
+    background-color: #ffffff;
+}
+
+.slider:before {
+    position: absolute;
+    content: "";
+    height: 18px;
+    width: 18px;
+    left: 3px;
+    bottom: 3px;
+    background-color: white;
+    transition: .3s;
+    border-radius: 50%;
+}

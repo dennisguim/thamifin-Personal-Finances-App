@@ -44,6 +44,7 @@ class Workspace(Base):
     future_incomes = relationship("FutureIncome", back_populates="workspace", cascade="all, delete-orphan")
     financial_goals = relationship("FinancialGoal", back_populates="workspace", cascade="all, delete-orphan")
     fixed_rules = relationship("FixedCostRule", back_populates="workspace", cascade="all, delete-orphan")
+    planned_expenses = relationship("PlannedExpense", back_populates="workspace", cascade="all, delete-orphan")
 
 
 class WorkspaceMember(Base):
@@ -185,6 +186,28 @@ class FutureIncome(Base):
     workspace = relationship("Workspace", back_populates="future_incomes")
 
 
+class PlannedExpense(Base):
+    """
+    Gasto ou despesa prevista para o planejamento orçamentário futuro.
+    Pode ser fixo ou variável, recorrente (alastrando para os meses seguintes) ou eventual/pontual.
+    """
+    __tablename__ = "planned_expenses"
+    
+    id = Column(Integer, primary_key=True, index=True)
+    workspace_id = Column(Integer, ForeignKey("workspaces.id", ondelete="CASCADE"), nullable=False)
+    description = Column(String, nullable=False)
+    amount = Column(Float, nullable=False)
+    category = Column(String, default="Outros")
+    cost_type = Column(String, default="fixo") # 'fixo' ou 'variavel'
+    is_recurrent = Column(Boolean, default=True) # Se True, alastra para todos os meses futuros
+    start_date = Column(DateTime, default=datetime.utcnow) # Mês/Ano de início (ou do evento pontual)
+    end_date = Column(DateTime, nullable=True) # Opcional: até quando se repete
+    due_day = Column(Integer, default=10) # Dia previsto do gasto
+    created_at = Column(DateTime, default=datetime.utcnow)
+    
+    workspace = relationship("Workspace", back_populates="planned_expenses")
+
+
 class FinancialGoal(Base):
     """Meta financeira vinculada ao Banco de Dados."""
     __tablename__ = "financial_goals"
@@ -317,6 +340,8 @@ def init_db():
             conn.exec_driver_sql("ALTER TABLE financial_goals ADD COLUMN workspace_id INTEGER REFERENCES workspaces(id) ON DELETE CASCADE")
         if not table_has_col("fixed_cost_rules", "workspace_id"):
             conn.exec_driver_sql("ALTER TABLE fixed_cost_rules ADD COLUMN workspace_id INTEGER REFERENCES workspaces(id) ON DELETE CASCADE")
+        if not table_has_col("future_incomes", "category"):
+            conn.exec_driver_sql("ALTER TABLE future_incomes ADD COLUMN category VARCHAR DEFAULT 'Receita'")
 
     # Inicialização de dados
     db = SessionLocal()

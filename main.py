@@ -13,7 +13,7 @@ from dotenv import load_dotenv
 
 from database import (
     init_db, get_db, User, Account, Transaction, FixedCostRule, Category, 
-    InstallmentPlan, FutureIncome, FinancialGoal, SessionLocal,
+    InstallmentPlan, FutureIncome, PlannedExpense, FinancialGoal, SessionLocal,
     Workspace, WorkspaceMember, get_user_workspace, ensure_user_workspace,
     RegistrationVerification
 )
@@ -430,6 +430,22 @@ def parcelamentos_page(request: Request, db: Session = Depends(get_db)):
         request=request,
         name="parcelamentos.html", 
         context={"user": current_user, "workspace": workspace, "active_page": "parcelamentos"}
+    )
+
+
+@app.get("/planejamento", response_class=HTMLResponse)
+def planejamento_page(request: Request, db: Session = Depends(get_db)):
+    """Renderiza a página de Planejamento Orçamentário e Previsão Futura."""
+    try:
+        current_user = get_current_user(request, db)
+    except HTTPException:
+        return RedirectResponse(url="/login", status_code=303)
+        
+    workspace = get_user_workspace(current_user, db)
+    return templates.TemplateResponse(
+        request=request,
+        name="planejamento.html", 
+        context={"user": current_user, "workspace": workspace, "active_page": "planejamento"}
     )
 
 
@@ -1541,6 +1557,257 @@ def delete_future_income(
     db.delete(inc)
     db.commit()
     return {"status": "success", "message": "Receita futura excluída com sucesso"}
+
+
+# --- API DE PLANEJAMENTO & PREVISÃO ORÇAMENTÁRIA (ISOLADA POR BANCO DE DADOS) ---
+
+@app.get("/api/planejamento/data")
+def get_planejamento_data(
+    month: int = None,
+    year: int = None,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
+    """
+    Retorna o planejamento orçamentário completo para o mês e ano selecionados:
+    - Gastos Previstos (Fixos e Variáveis, Recorrentes ou Pontuais)
+    - Receitas Previstas / Simuladas (Fixadas ou Pontuais)
+    - Realizado nos Extratos Bancários (Gastos Reais e Receitas Reais)
+    - Comparativo Previsto vs Realizado (Geral e por Categorias)
+    - Indicador de Necessidade de Receita e Cobertura Orçamentária
+    """
+    workspace = get_user_workspace(current_user, db)
+    now = datetime.now()
+    target_month = month if (month and 1 <= month <= 12) else now.month
+    target_year = year if (year and year >= 2000) else now.year
+    
+    MONTH_NAMES = ["", "Janeiro", "Fevereiro", "Março", "Abril", "Maio", "Junho", "Julho", "Agosto", "Setembro", "Outubro", "Novembro", "Dezembro"]
+    period_label = f"{MONTH_NAMES[target_month]} de {target_year}"
+    
+    target_period = (target_year, target_month)
+    now_period = (now.year, now.month)
+    is_past = target_period < now_period
+    is_current = target_period == now_period
+    is_future = target_period > now_period
+    
+    # 1. Busca todos os Gastos Previstos do Workspace
+    all_planned = db.query(PlannedExpense).filter(
+        PlannedExpense.workspace_id == workspace.id
+    ).order_by(PlannedExpense.due_day.asc(), PlannedExpense.id.asc()).all()
+    
+    active_planned_expenses = []
+    for exp in all_planned:
+        start_p = (exp.start_date.year, exp.start_date.month) if exp.start_date else (target_year, target_month)
+        if exp.is_recurrent:
+            if start_p <= target_period:
+                if exp.end_date is None or target_period <= (exp.end_date.year, exp.end_date.month):
+                    active_planned_expenses.append(exp)
+        else:
+            if start_p == target_period:
+                active_planned_expenses.append(exp)
+                
+    total_planned_expenses = sum(e.amount for e in active_planned_expenses)
+    total_planned_fixed = sum(e.amount for e in active_planned_expenses if e.cost_type == "fixo")
+    total_planned_variable = sum(e.amount for e in active_planned_expenses if e.cost_type == "variavel")
+    
+    planned_by_category = {}
+    for e in active_planned_expenses:
+        cat = e.category or "Outros"
+        planned_by_category[cat] = planned_by_category.get(cat, 0.0) + e.amount
+
+    # 2. Busca todas as Receitas Futuras / Simuladas do Workspace
+    all_incomes = db.query(FutureIncome).filter(
+        FutureIncome.workspace_id == workspace.id
+    ).order_by(FutureIncome.receive_day.asc(), FutureIncome.id.asc()).all()
+    
+    active_incomes = []
+    for inc in all_incomes:
+        start_p = (inc.start_date.year, inc.start_date.month) if inc.start_date else (target_year, target_month)
+        if inc.is_recurrent:
+            if start_p <= target_period:
+                active_incomes.append(inc)
+        else:
+            if start_p == target_period:
+                active_incomes.append(inc)
+                
+    total_planned_income = sum(i.amount for i in active_incomes)
+
+    # 3. Busca Dados Realizados dos Extratos Bancários para este mês/ano
+    accounts = db.query(Account).filter(Account.workspace_id == workspace.id).all()
+    account_ids = [acc.id for acc in accounts]
+    
+    realized_txs = []
+    if account_ids:
+        all_month_txs = db.query(Transaction).filter(
+            Transaction.account_id.in_(account_ids),
+            Transaction.category != "Transferência entre Contas"
+        ).all()
+        realized_txs = [t for t in all_month_txs if t.date and t.date.year == target_year and t.date.month == target_month]
+
+    realized_income = sum(t.amount for t in realized_txs if t.amount > 0)
+    realized_expense = sum(abs(t.amount) for t in realized_txs if t.amount < 0)
+    realized_fixed = sum(abs(t.amount) for t in realized_txs if t.amount < 0 and t.cost_type == "fixo")
+    realized_variable = sum(abs(t.amount) for t in realized_txs if t.amount < 0 and t.cost_type != "fixo")
+    
+    realized_by_category = {}
+    for t in realized_txs:
+        if t.amount < 0:
+            cat = t.category or "Outros"
+            realized_by_category[cat] = realized_by_category.get(cat, 0.0) + abs(t.amount)
+
+    # 4. Comparativo por Categorias
+    all_categories = sorted(list(set(list(planned_by_category.keys()) + list(realized_by_category.keys()))))
+    categories_comparison = []
+    for cat in all_categories:
+        p_val = planned_by_category.get(cat, 0.0)
+        r_val = realized_by_category.get(cat, 0.0)
+        diff = r_val - p_val
+        usage_pct = (r_val / p_val * 100.0) if p_val > 0 else (100.0 if r_val > 0 else 0.0)
+        
+        if p_val > 0:
+            if r_val <= p_val:
+                status = "ok" # Dentro do teto
+            else:
+                status = "exceeded" # Estourou
+        else:
+            status = "unbudgeted" if r_val > 0 else "neutral"
+            
+        categories_comparison.append({
+            "category": cat,
+            "planned": round(p_val, 2),
+            "realized": round(r_val, 2),
+            "difference": round(diff, 2),
+            "usage_pct": round(usage_pct, 1),
+            "status": status
+        })
+
+    # 5. Saldo e Cobertura
+    needed_income = total_planned_expenses
+    planned_balance = total_planned_income - total_planned_expenses
+    realized_balance = realized_income - realized_expense
+    budget_usage_pct = (realized_expense / total_planned_expenses * 100.0) if total_planned_expenses > 0 else 0.0
+    
+    if planned_balance > 0:
+        coverage_status = "superavit"
+    elif planned_balance < 0:
+        coverage_status = "deficit"
+    else:
+        coverage_status = "neutro"
+
+    return {
+        "period": {
+            "month": target_month,
+            "year": target_year,
+            "label": period_label,
+            "is_past": is_past,
+            "is_current": is_current,
+            "is_future": is_future
+        },
+        "summary": {
+            "total_planned_expenses": round(total_planned_expenses, 2),
+            "total_planned_fixed": round(total_planned_fixed, 2),
+            "total_planned_variable": round(total_planned_variable, 2),
+            "total_planned_income": round(total_planned_income, 2),
+            "needed_income": round(needed_income, 2),
+            "planned_balance": round(planned_balance, 2),
+            "coverage_status": coverage_status,
+            "coverage_diff": round(abs(planned_balance), 2),
+            "total_realized_expenses": round(realized_expense, 2),
+            "total_realized_fixed": round(realized_fixed, 2),
+            "total_realized_variable": round(realized_variable, 2),
+            "total_realized_income": round(realized_income, 2),
+            "realized_balance": round(realized_balance, 2),
+            "budget_difference": round(realized_expense - total_planned_expenses, 2),
+            "budget_usage_pct": round(budget_usage_pct, 1)
+        },
+        "planned_expenses": [
+            {
+                "id": exp.id,
+                "description": exp.description,
+                "amount": exp.amount,
+                "category": exp.category,
+                "cost_type": exp.cost_type,
+                "is_recurrent": exp.is_recurrent,
+                "due_day": exp.due_day,
+                "start_date": exp.start_date.strftime("%Y-%m-%d") if exp.start_date else None
+            } for exp in active_planned_expenses
+        ],
+        "planned_incomes": [
+            {
+                "id": inc.id,
+                "description": inc.description,
+                "amount": inc.amount,
+                "is_recurrent": inc.is_recurrent,
+                "receive_day": inc.receive_day,
+                "start_date": inc.start_date.strftime("%Y-%m-%d") if inc.start_date else None
+            } for inc in active_incomes
+        ],
+        "categories_comparison": categories_comparison
+    }
+
+
+@app.post("/api/planned-expenses")
+def create_planned_expense(
+    description: str = Form(...),
+    amount: float = Form(...),
+    category: str = Form("Outros"),
+    cost_type: str = Form("fixo"),
+    is_recurrent: bool = Form(True),
+    due_day: int = Form(10),
+    start_date: str = Form(...),
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
+    """Cadastra um novo gasto previsto no planejamento orçamentário."""
+    desc_clean = description.strip()
+    if not desc_clean:
+        raise HTTPException(status_code=400, detail="A descrição não pode ser vazia.")
+    if amount <= 0:
+        raise HTTPException(status_code=400, detail="O valor deve ser maior que zero.")
+        
+    try:
+        if len(start_date) == 7: # "YYYY-MM"
+            dt_start = datetime.strptime(f"{start_date}-01", "%Y-%m-%d")
+        else:
+            dt_start = datetime.strptime(start_date[:10], "%Y-%m-%d")
+    except ValueError:
+        dt_start = datetime.now()
+        
+    workspace = get_user_workspace(current_user, db)
+    clean_type = "fixo" if cost_type.lower() == "fixo" else "variavel"
+    
+    new_exp = PlannedExpense(
+        workspace_id=workspace.id,
+        description=desc_clean,
+        amount=amount,
+        category=category.strip() or "Outros",
+        cost_type=clean_type,
+        is_recurrent=bool(is_recurrent),
+        due_day=max(1, min(31, int(due_day))),
+        start_date=dt_start
+    )
+    db.add(new_exp)
+    db.commit()
+    return {"status": "success", "message": f"Gasto previsto '{desc_clean}' cadastrado com sucesso!"}
+
+
+@app.delete("/api/planned-expenses/{expense_id}")
+def delete_planned_expense(
+    expense_id: int,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
+    """Exclui um gasto previsto do planejamento orçamentário."""
+    workspace = get_user_workspace(current_user, db)
+    exp = db.query(PlannedExpense).filter(
+        PlannedExpense.id == expense_id,
+        PlannedExpense.workspace_id == workspace.id
+    ).first()
+    if not exp:
+        raise HTTPException(status_code=404, detail="Gasto previsto não encontrado.")
+    db.delete(exp)
+    db.commit()
+    return {"status": "success", "message": "Gasto previsto excluído com sucesso."}
 
 
 # --- API DE METAS FINANCEIRAS (ISOLADA POR BANCO DE DADOS) ---
