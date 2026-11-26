@@ -288,6 +288,68 @@
                     </div>
                 </div>
 
+                <!-- CARD 3: SEGURANÇA E ALTERAÇÃO DE SENHA -->
+                <div class="m3-card">
+                    <div class="card-header-bank">
+                        <h3 style="display: flex; align-items: center; gap: 8px;">
+                            <span class="material-symbols-outlined" style="color: var(--md-sys-color-primary);">lock_reset</span>
+                            Segurança da Conta
+                        </h3>
+                        <span style="background: var(--glass-input-bg); color: var(--md-sys-color-primary); font-size: 11.5px; font-weight: 700; padding: 3px 10px; border-radius: var(--radius-full); border: 1px solid var(--md-sys-color-outline-variant);">
+                            Senha de Acesso
+                        </span>
+                    </div>
+
+                    <p style="font-size: 13px; color: var(--md-sys-color-outline); margin-top: 2px; margin-bottom: 14px;">
+                        Altere sua senha de login mantendo sua conta protegida.
+                    </p>
+
+                    <form id="changePasswordForm" style="display: flex; flex-direction: column; gap: 14px;">
+                        <div style="display: flex; flex-direction: column; gap: 6px;">
+                            <label for="currentPassword" style="font-size: 12.5px; font-weight: 600; color: var(--md-sys-color-outline);">
+                                Senha Atual:
+                            </label>
+                            <div style="position: relative; display: flex; align-items: center;">
+                                <input type="password" id="currentPassword" required class="filter-select" placeholder="Digite sua senha atual" style="width: 100%; padding-right: 42px; min-height: 42px;">
+                                <button type="button" onclick="togglePasswordVisibility('currentPassword', 'toggleCurrentPassIcon')" style="position: absolute; right: 10px; background: none; border: none; cursor: pointer; color: var(--md-sys-color-outline); display: flex; align-items: center; justify-content: center; padding: 4px;" title="Mostrar/ocultar senha">
+                                    <span class="material-symbols-outlined" id="toggleCurrentPassIcon" style="font-size: 20px;">visibility</span>
+                                </button>
+                            </div>
+                        </div>
+
+                        <div style="display: flex; flex-direction: column; gap: 6px;">
+                            <label for="newPassword" style="font-size: 12.5px; font-weight: 600; color: var(--md-sys-color-outline);">
+                                Nova Senha:
+                            </label>
+                            <div style="position: relative; display: flex; align-items: center;">
+                                <input type="password" id="newPassword" required minlength="6" class="filter-select" placeholder="Mínimo de 6 caracteres" style="width: 100%; padding-right: 42px; min-height: 42px;">
+                                <button type="button" onclick="togglePasswordVisibility('newPassword', 'toggleNewPassIcon')" style="position: absolute; right: 10px; background: none; border: none; cursor: pointer; color: var(--md-sys-color-outline); display: flex; align-items: center; justify-content: center; padding: 4px;" title="Mostrar/ocultar senha">
+                                    <span class="material-symbols-outlined" id="toggleNewPassIcon" style="font-size: 20px;">visibility</span>
+                                </button>
+                            </div>
+                        </div>
+
+                        <div style="display: flex; flex-direction: column; gap: 6px;">
+                            <label for="confirmPassword" style="font-size: 12.5px; font-weight: 600; color: var(--md-sys-color-outline);">
+                                Confirmar Nova Senha:
+                            </label>
+                            <div style="position: relative; display: flex; align-items: center;">
+                                <input type="password" id="confirmPassword" required minlength="6" class="filter-select" placeholder="Repita a nova senha" style="width: 100%; padding-right: 42px; min-height: 42px;">
+                                <button type="button" onclick="togglePasswordVisibility('confirmPassword', 'toggleConfirmPassIcon')" style="position: absolute; right: 10px; background: none; border: none; cursor: pointer; color: var(--md-sys-color-outline); display: flex; align-items: center; justify-content: center; padding: 4px;" title="Mostrar/ocultar senha">
+                                    <span class="material-symbols-outlined" id="toggleConfirmPassIcon" style="font-size: 20px;">visibility</span>
+                                </button>
+                            </div>
+                        </div>
+
+                        <div id="passwordAlertBox" style="display: none; padding: 10px 14px; border-radius: var(--radius-sm); font-size: 13px; font-weight: 500;"></div>
+
+                        <button type="submit" id="submitChangePassBtn" class="m3-btn m3-btn-primary" style="margin-top: 6px; width: 100%; justify-content: center; min-height: 42px; gap: 8px;">
+                            <span class="material-symbols-outlined">key</span>
+                            Alterar Senha
+                        </button>
+                    </form>
+                </div>
+
             </div>
 
             <!-- SEÇÃO: COMPARTILHAMENTO DE ACESSO AO BANCO DE DADOS -->
@@ -557,6 +619,86 @@
             const profileOverlay = document.getElementById("profileAccountModalOverlay");
             if (profileOverlay) {
                 profileOverlay.addEventListener("click", closeProfileNewAccountModal);
+            }
+
+            // Alterar Senha do Usuário
+            const changePassForm = document.getElementById("changePasswordForm");
+            if (changePassForm) {
+                changePassForm.addEventListener("submit", async (e) => {
+                    e.preventDefault();
+                    const curPass = document.getElementById("currentPassword").value;
+                    const newPass = document.getElementById("newPassword").value;
+                    const confPass = document.getElementById("confirmPassword").value;
+                    const alertBox = document.getElementById("passwordAlertBox");
+                    const submitBtn = document.getElementById("submitChangePassBtn");
+
+                    const showAlert = (msg, isSuccess = false) => {
+                        alertBox.style.display = "block";
+                        alertBox.style.background = isSuccess ? "rgba(16, 185, 129, 0.12)" : "rgba(239, 68, 68, 0.12)";
+                        alertBox.style.color = isSuccess ? "#10b981" : "#ef4444";
+                        alertBox.style.border = `1px solid ${isSuccess ? "rgba(16, 185, 129, 0.3)" : "rgba(239, 68, 68, 0.3)"}`;
+                        alertBox.innerHTML = `<div style="display: flex; align-items: center; gap: 8px;"><span class="material-symbols-outlined" style="font-size: 18px;">${isSuccess ? 'check_circle' : 'error'}</span><span>${msg}</span></div>`;
+                    };
+
+                    if (!curPass) {
+                        showAlert("Por favor, digite sua senha atual.");
+                        return;
+                    }
+                    if (newPass.length < 6) {
+                        showAlert("A nova senha deve ter no mínimo 6 caracteres.");
+                        return;
+                    }
+                    if (newPass !== confPass) {
+                        showAlert("A nova senha e a confirmação de senha não coincidem.");
+                        return;
+                    }
+                    if (curPass === newPass) {
+                        showAlert("A nova senha não pode ser idêntica à senha atual.");
+                        return;
+                    }
+
+                    submitBtn.disabled = true;
+                    submitBtn.style.opacity = "0.7";
+                    submitBtn.innerHTML = `<span class="material-symbols-outlined" style="animation: spin 1s linear infinite;">sync</span> Atualizando...`;
+
+                    const formData = new FormData();
+                    formData.append("current_password", curPass);
+                    formData.append("new_password", newPass);
+                    formData.append("confirm_password", confPass);
+
+                    try {
+                        const res = await fetch("/api/profile/change-password", {
+                            method: "POST",
+                            body: formData
+                        });
+                        const data = await res.json();
+                        if (res.ok) {
+                            showAlert(data.message || "Senha alterada com sucesso!", true);
+                            changePassForm.reset();
+                        } else {
+                            showAlert(data.detail || "Erro ao alterar a senha.");
+                        }
+                    } catch (err) {
+                        showAlert("Erro de conexão ao comunicar com o servidor.");
+                    } finally {
+                        submitBtn.disabled = false;
+                        submitBtn.style.opacity = "1";
+                        submitBtn.innerHTML = `<span class="material-symbols-outlined">key</span> Alterar Senha`;
+                    }
+                });
+            }
+        }
+
+        function togglePasswordVisibility(inputId, iconId) {
+            const input = document.getElementById(inputId);
+            const icon = document.getElementById(iconId);
+            if (!input || !icon) return;
+            if (input.type === "password") {
+                input.type = "text";
+                icon.textContent = "visibility_off";
+            } else {
+                input.type = "password";
+                icon.textContent = "visibility";
             }
         }
 

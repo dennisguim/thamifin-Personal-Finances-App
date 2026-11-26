@@ -614,6 +614,50 @@ def switch_workspace(
     return {"status": "success", "message": "Banco de Dados ativo alternado com sucesso!"}
 
 
+@app.post("/api/profile/change-password")
+def change_password(
+    current_password: str = Form(...),
+    new_password: str = Form(...),
+    confirm_password: str = Form(...),
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
+    """
+    Permite ao usuário autenticado alterar sua própria senha.
+    Valida a senha atual, compara a nova senha com a confirmação,
+    e exige um tamanho mínimo seguro (mínimo 6 caracteres).
+    """
+    if not current_password:
+        raise HTTPException(status_code=400, detail="Por favor, informe sua senha atual.")
+
+    if not verify_password(current_password, current_user.hashed_password):
+        raise HTTPException(status_code=400, detail="A senha atual informada está incorreta.")
+
+    new_pass_clean = new_password.strip() if new_password else ""
+    confirm_pass_clean = confirm_password.strip() if confirm_password else ""
+
+    if not new_pass_clean:
+        raise HTTPException(status_code=400, detail="A nova senha não pode ser vazia.")
+
+    if len(new_pass_clean) < 6:
+        raise HTTPException(status_code=400, detail="A nova senha deve ter no mínimo 6 caracteres.")
+
+    if new_pass_clean != confirm_pass_clean:
+        raise HTTPException(status_code=400, detail="A nova senha e a confirmação de senha não coincidem.")
+
+    if verify_password(new_pass_clean, current_user.hashed_password):
+        raise HTTPException(status_code=400, detail="A nova senha não pode ser idêntica à senha atual.")
+
+    current_user.hashed_password = get_password_hash(new_pass_clean)
+    db.add(current_user)
+    db.commit()
+
+    return {
+        "status": "success",
+        "message": "Sua senha foi alterada com sucesso!"
+    }
+
+
 # --- PAINEL ADMINISTRATIVO (/admin) ---
 
 @app.get("/admin", response_class=HTMLResponse)
