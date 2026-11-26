@@ -24,6 +24,7 @@ from auth import (
 from email_service import send_confirmation_code, ADMIN_NOTIFICATION_EMAIL
 from ofx_parser import parse_and_import_ofx
 from pdf_parser import parse_and_import_pdf
+from csv_parser import parse_and_import_csv
 
 # Carrega variáveis de ambiente
 load_dotenv()
@@ -1089,10 +1090,13 @@ async def upload_statement_file(
     file_bytes = await file.read()
     filename_lower = (file.filename or "").lower()
     is_pdf = filename_lower.endswith(".pdf") or file_bytes.startswith(b"%PDF")
+    is_csv = filename_lower.endswith(".csv")
     
     try:
         if is_pdf:
             transactions, ledger_balance = parse_and_import_pdf(file_content=file_bytes, account_id=account.id)
+        elif is_csv:
+            transactions, ledger_balance = parse_and_import_csv(file_content=file_bytes, account_id=account.id)
         else:
             transactions, ledger_balance = parse_and_import_ofx(file_content=file_bytes, account_id=account.id)
         

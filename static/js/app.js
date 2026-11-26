@@ -138,11 +138,11 @@ function renderAccountsCards(accounts) {
             </div>
             <div class="balance-display">${formatCurrency(acc.balance)}</div>
             
-            <!-- Zona de Upload de Extrato OFX ou PDF -->
+            <!-- Zona de Upload de Extrato OFX, PDF ou CSV -->
             <div class="drag-drop-area" id="dropzone-${acc.id}">
                 <span class="material-symbols-outlined" style="font-size: 32px; color: var(--md-sys-color-primary);">upload_file</span>
-                <div><b>Toque para importar</b> ou arraste extrato OFX ou PDF</div>
-                <input type="file" id="fileInput-${acc.id}" style="display: none;" accept=".ofx,.xml,.pdf">
+                <div><b>Toque para importar</b> ou arraste extrato OFX, PDF ou CSV</div>
+                <input type="file" id="fileInput-${acc.id}" style="display: none;" accept=".ofx,.xml,.pdf,.csv">
             </div>
         `;
         
